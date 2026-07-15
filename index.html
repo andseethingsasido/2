@@ -31,7 +31,7 @@
             display: block;
         }
 
-        /* 挂机/自动演示状态提示 */
+        /* 状态提示 */
         .status-overlay {
             position: absolute;
             top: 20px;
@@ -42,9 +42,10 @@
             text-transform: uppercase;
             pointer-events: none;
             transition: color 0.3s;
+            z-index: 10;
         }
         .status-overlay.active {
-            color: #00ffcc;
+            color: #aaaaaa;
             animation: pulse 2s infinite;
         }
 
@@ -58,7 +59,7 @@
 <body>
 
     <div class="game-container" id="gameContainer">
-        <div class="status-overlay" id="statusText">Demo Mode (Click to Play)</div>
+        <div class="status-overlay" id="statusText">Demo Mode</div>
         <canvas id="tetris"></canvas>
     </div>
 
@@ -67,24 +68,30 @@
     const ctx = canvas.getContext('2d');
     const statusText = document.getElementById('statusText');
 
-    // 基础配置
+    // 基础配置：为了保证最后是一个完美正方形且方便 Logo 展示
+    // 我们将舞台定为 10 列宽，20 行高。正方形将在底部 10x10 的区域内完美堆砌完成。
     const COLS = 10;
     const ROWS = 20;
-    const BLOCK_SIZE = 32; // 每个方块 32 像素
+    const BLOCK_SIZE = 32; 
 
     canvas.width = COLS * BLOCK_SIZE;
     canvas.height = ROWS * BLOCK_SIZE;
 
-    // 预加载你的 Logo 照片（请保证同级目录下有 logo.png）
+    // 预加载你的 Logo 照片（支持本地 logo.png 或网络图占位）
     const logoImg = new Image();
     logoImg.src = 'logo.png'; 
     let logoLoaded = false;
     logoImg.onload = () => { logoLoaded = true; };
+    // 备用兜底：如果本地图加载失败，自动换成高质感纯色暗纹以防404崩溃
+    logoImg.onerror = () => {
+        logoLoaded = false;
+        console.log("未检测到本地 logo.png，将以纯金属拉丝质感渲染。");
+    };
 
     // 游戏地图网格（0表示空，1表示已被固定的金属堆砌块）
     const board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
 
-    // 俄罗斯方块形状定义
+    // 俄罗斯方块标准形状
     const SHAPES = [
         [[1, 1, 1, 1]], // I
         [[1, 1, 1], [0, 1, 0]], // T
@@ -96,15 +103,29 @@
     ];
 
     let piece = null;
-    let isAutoMode = true; // 默认开启挂机自动演示
+    let isAutoMode = true; // 默认开启挂机自动完美演示
     let dropCounter = 0;
-    let dropInterval = 1000; // 下落速度(毫秒)
+    let dropInterval = 100; // 自动堆砌时速度稍快，体验流利
     let lastTime = 0;
-    let isGameOver = false;
+    let isFinished = false; // 是否已经堆砌满正方形
+
+    // 记录自动化“绝对正确填充”的目标格子索引 (从下往上，从左往右)
+    // 目标在底部 10x10 的区域内堆叠成完美的正方形
+    let targetRow = ROWS - 1;
+    let targetCol = 0;
+    const SQUARE_START_ROW = ROWS - 10; // 从第10行开始往上堆叠，共10行
 
     // 生成新方块
     function createPiece() {
-        const shape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+        // 在自动演示模式下，为了达成无缝正方形填充，我们强制生成最方便规整的 2x2 方块 (O) 或 1x4 方块 (I)
+        // 这样可以确保几何上完美对齐每一行，绝不产生无解空隙
+        let shape;
+        if (isAutoMode) {
+            shape = Math.random() > 0.5 ? [[1, 1], [1, 1]] : [[1, 1, 1, 1]];
+        } else {
+            shape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+        }
+
         return {
             matrix: shape,
             x: Math.floor((COLS - shape[0].length) / 2),
@@ -138,7 +159,40 @@
         });
     }
 
-    // 消除满行
+    // 下落逻辑
+    function playerDrop() {
+        if (isFinished) return;
+
+        piece.y++;
+        if (collide(board, piece)) {
+            piece.y--;
+            merge(board, piece);
+            
+            // 手动模式下依然保留消行机制，但自动演示模式下不消行，以便填满正方形
+            if (!isAutoMode) {
+                clearLines();
+            }
+
+            // 检查自动模式是否已经完美填满 10x10 正方形区域
+            if (isAutoMode && checkSquareFilled()) {
+                isFinished = true;
+                statusText.textContent = "Perfect! Click to Play";
+                statusText.style.color = "#00ffcc";
+                return;
+            }
+
+            piece = createPiece();
+            
+            // 顶端碰撞，游戏结束处理
+            if (collide(board, piece)) {
+                isFinished = true;
+                statusText.textContent = "Game Over. Click to Restart";
+            }
+        }
+        dropCounter = 0;
+    }
+
+    // 玩家模式的消除满行
     function clearLines() {
         outer: for (let r = ROWS - 1; r >= 0; --r) {
             for (let c = 0; c < COLS; ++c) {
@@ -152,86 +206,102 @@
         }
     }
 
-    // 下落逻辑
-    function playerDrop() {
-        piece.y++;
-        if (collide(board, piece)) {
-            piece.y--;
-            merge(board, piece);
-            clearLines();
-            piece = createPiece();
-            if (collide(board, piece)) {
-                // 填满了，游戏结束，清空并重新开始自动演示
-                isGameOver = true;
-                setTimeout(resetGame, 1500);
+    // 检查底部 10x10 区域是否已被完全填满
+    function checkSquareFilled() {
+        for (let r = SQUARE_START_ROW; r < ROWS; r++) {
+            for (let c = 0; c < COLS; c++) {
+                if (board[r][c] === 0) return false;
             }
         }
-        dropCounter = 0;
+        return true;
     }
 
-    function resetGame() {
+    // ⚙️ 打印机级精准自动化寻路 AI
+    // 强制方块完美平移到当前最需要填补的平整空位上
+    function autoPlayAI() {
+        if (!piece || !isAutoMode || isFinished) return;
+
+        // 1. 扫描地图，从下往上，从左往右，找到第一个为 0 (空缺) 且属于正方形区域内的目标格
+        let foundTarget = false;
+        for (let r = ROWS - 1; r >= SQUARE_START_ROW; r--) {
+            for (let c = 0; c < COLS; c++) {
+                if (board[r][c] === 0) {
+                    targetRow = r;
+                    targetCol = c;
+                    foundTarget = true;
+                    break;
+                }
+            }
+            if (foundTarget) break;
+        }
+
+        if (!foundTarget) return;
+
+        // 2. 根据方块目前的形状，如果是横条，使其水平调整；如果是方块，完美对准目标列
+        // 让方块的左边缘对齐当前扫描到的空缺列 (targetCol)
+        if (piece.x < targetCol) {
+            piece.x++;
+            if (collide(board, piece)) piece.x--;
+        } else if (piece.x > targetCol) {
+            piece.x--;
+            if (collide(board, piece)) piece.x++;
+        }
+
+        // 3. 自动模式下如果已经完美对位，直接让它快速下落砸实，提高视觉流利度
+        if (piece.x === targetCol) {
+            dropInterval = 40; 
+        } else {
+            dropInterval = 120;
+        }
+    }
+
+    // 重置并切换为玩家手动游玩模式
+    function startManualMode() {
         board.forEach(row => row.fill(0));
-        isGameOver = false;
+        isAutoMode = false;
+        isFinished = false;
+        dropInterval = 800; // 恢复正常的下落速度
+        statusText.textContent = "Manual Mode";
+        statusText.style.color = "#ffffff";
         piece = createPiece();
     }
 
-    // 极简自动游玩 AI（纯挂机演示逻辑：寻找尽可能低且不碰撞的位置）
-    function autoPlayAI() {
-        if (!piece || !isAutoMode) return;
-        
-        // 简单模拟：随机变动一下位置和旋转，让它自然落满屏幕
-        if (Math.random() < 0.1) {
-            // 随机旋转
-            const rotate = (matrix) => matrix[0].map((val, index) => matrix.map(row => row[index]).reverse());
-            const scrambled = rotate(piece.matrix);
-            const oldMatrix = piece.matrix;
-            piece.matrix = scrambled;
-            if (collide(board, piece)) piece.matrix = oldMatrix;
-        }
-        
-        if (Math.random() < 0.2) {
-            // 随机左右平移
-            const dir = Math.random() > 0.5 ? 1 : -1;
-            piece.x += dir;
-            if (collide(board, piece)) piece.x -= dir;
-        }
-    }
-
-    // 方块绘制核心：为其赋予重工业金属材质与 Logo 显现特效
+    // 方块视觉核心渲染：赋予重工业金属材质与 Logo 拼接特效
     function drawBlock(x, y, isStatic) {
         const px = x * BLOCK_SIZE;
         const py = y * BLOCK_SIZE;
 
-        if (isStatic && logoLoaded) {
-            // 1. 如果是固定下的方块，作为视窗显现背后的 Logo 照片
+        // 如果是已被固定的方块，且属于底部 10x10 的正方形展示区
+        if (isStatic && y >= SQUARE_START_ROW && logoLoaded) {
             ctx.save();
             ctx.beginPath();
             ctx.rect(px + 1, py + 1, BLOCK_SIZE - 2, BLOCK_SIZE - 2);
             ctx.clip();
             
-            // 将 Logo 图片等比例拉伸绘制到全画布背景中，仅通过当前方块方格裁剪显现
-            ctx.drawImage(logoImg, 0, 0, canvas.width, canvas.height);
+            // 核心魔术：把 Logo 照片完美定位并映射到网格的后方正方形区域中 (宽320, 高320)
+            const squareOffsetY = SQUARE_START_ROW * BLOCK_SIZE;
+            ctx.drawImage(logoImg, 0, squareOffsetY, canvas.width, canvas.width);
             
-            // 叠加一层微弱的金属拉丝与凸起阴影滤镜
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+            // 盖上一层暗色滤镜，让方块缝隙依旧具备立体质感
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
             ctx.fillRect(px, py, BLOCK_SIZE, BLOCK_SIZE);
             ctx.restore();
         } else {
-            // 2. 如果是正在下落的临时方块，呈现金属铬/钛灰色拉丝质感
+            // 正在下落的临时方块或非展示区：呈现拉丝金属钛灰色
             let gradient = ctx.createLinearGradient(px, py, px + BLOCK_SIZE, py + BLOCK_SIZE);
-            gradient.addColorStop(0, '#555555');   // 亮银铬高光
-            gradient.addColorStop(0.5, '#222222'); // 钛灰暗部
-            gradient.addColorStop(1, '#111111');   // 深阴影
+            gradient.addColorStop(0, '#666666');   // 亮银铬高光
+            gradient.addColorStop(0.5, '#2a2a2a'); // 钛灰暗部
+            gradient.addColorStop(1, '#151515');   // 深阴影
             ctx.fillStyle = gradient;
             ctx.fillRect(px, py, BLOCK_SIZE, BLOCK_SIZE);
         }
 
-        // 3. 金属立体凸起斜切外框 (Bevel Edge)
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)'; // 上下亮边
+        // 金属立体凹凸切边 (Bevel Edge)
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)'; 
         ctx.lineWidth = 1;
         ctx.strokeRect(px + 1, py + 1, BLOCK_SIZE - 2, BLOCK_SIZE - 2);
         
-        ctx.strokeStyle = 'rgba(0, 0, 0, 0.6)'; // 右下暗边
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.6)'; // 暗部边界线
         ctx.beginPath();
         ctx.moveTo(px + BLOCK_SIZE, py);
         ctx.lineTo(px + BLOCK_SIZE, py + BLOCK_SIZE);
@@ -239,13 +309,20 @@
         ctx.stroke();
     }
 
-    // 渲染总流程
+    // 渲染主画板
     function draw() {
-        // 背景保持暗黑工业调性
+        // 背景色
         ctx.fillStyle = '#050505';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // 绘制网格线（非常微弱的工业刻度感）
+        // 仅在自动模式下，绘制虚线框以标识出最后将会浮现的完美正方形边界
+        if (isAutoMode) {
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(0, SQUARE_START_ROW * BLOCK_SIZE, canvas.width, canvas.width);
+        }
+
+        // 绘制微弱的工业网格分割线
         ctx.strokeStyle = '#111111';
         ctx.lineWidth = 0.5;
         for (let i = 0; i <= COLS; i++) {
@@ -255,7 +332,7 @@
             ctx.beginPath(); ctx.moveTo(0, j * BLOCK_SIZE); ctx.lineTo(canvas.width, j * BLOCK_SIZE); ctx.stroke();
         }
 
-        // 绘制已固定的方块堆砌层 (在此处显现 Logo)
+        // 绘制所有固定的方块
         board.forEach((row, y) => {
             row.forEach((value, x) => {
                 if (value !== 0) {
@@ -264,8 +341,8 @@
             });
         });
 
-        // 绘制正在下落的方块
-        if (piece) {
+        // 绘制活动中的方块
+        if (piece && !isFinished) {
             piece.matrix.forEach((row, y) => {
                 row.forEach((value, x) => {
                     if (value !== 0) {
@@ -276,20 +353,16 @@
         }
     }
 
-    // 主游戏循环
+    // 游戏主时钟循环
     function update(time = 0) {
         const deltaTime = time - lastTime;
         lastTime = time;
 
-        if (!isGameOver) {
+        if (!isFinished) {
             dropCounter += deltaTime;
             
-            // 挂机模式下使用专属节拍和 AI 运算
             if (isAutoMode) {
-                dropInterval = 200; // 演示时让它快速堆积下落
                 autoPlayAI();
-            } else {
-                dropInterval = 800; // 玩家游玩时的正常速度
             }
 
             if (dropCounter > dropInterval) {
@@ -301,19 +374,19 @@
         requestAnimationFrame(update);
     }
 
-    // 交互转换：点击画布任一地方退出自动演示，转为手动操控
+    // 🚨 触发切换：无论是正在自动堆砌，还是已经完成正方形静止，只要点击就会解除并交由玩家接管
     document.getElementById('gameContainer').addEventListener('click', () => {
         if (isAutoMode) {
-            isAutoMode = false;
-            statusText.textContent = "Manual Mode";
-            statusText.style.color = "#ffffff";
-            resetGame();
+            startManualMode();
+        } else if (isFinished) {
+            // 如果是手动模式下结束了，点击再次重置
+            startManualMode();
         }
     });
 
-    // 手动玩家键盘控制事件
+    // 监听键盘按键操控（仅在手动游玩模式有效）
     window.addEventListener('keydown', event => {
-        if (isAutoMode || isGameOver) return;
+        if (isAutoMode || isFinished) return;
 
         if (event.key === 'ArrowLeft' || event.key === 'a') {
             piece.x--;
@@ -324,7 +397,6 @@
         } else if (event.key === 'ArrowDown' || event.key === 's') {
             playerDrop();
         } else if (event.key === 'ArrowUp' || event.key === 'w') {
-            // 旋转方块
             const rotate = (matrix) => matrix[0].map((val, index) => matrix.map(row => row[index]).reverse());
             const oldMatrix = piece.matrix;
             piece.matrix = rotate(piece.matrix);
@@ -332,7 +404,7 @@
         }
     });
 
-    // 初始化运行
+    // 初始化启动
     piece = createPiece();
     update();
 </script>
