@@ -1,0 +1,33 @@
+[
+  {
+    "id": "01",
+    "name": "Silk Trench Coat",
+    "price": "CNY 8,900",
+    "images": [
+      "item1-1.jpg",
+      "item1-2.jpg",
+      "item1-3.jpg"
+    ],
+    "link": "https://andseethingsasido.github.io/page2/buy1"
+  },
+  {
+    "id": "02",
+    "name": "Monogram Leather Bag",
+    "price": "CNY 14,500",
+    "images": [
+      "item2-1.jpg",
+      "item2-2.jpg"
+    ],
+    "link": "https://andseethingsasido.github.io/page2/buy2"
+  },
+  {
+    "id": "03",
+    "name": "Classic Linen Shirt",
+    "price": "CNY 3,200",
+    "images": [
+      "item3-1.jpg",
+      "item3-2.jpg"
+    ],
+    "link": "https://andseethingsasido.github.io/page2/buy3"
+  }
+]
