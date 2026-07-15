@@ -2,15 +2,24 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WHITE MINIMALIST TETRIS 6X6</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=none">
+    <title>RETRO INDUSTRIAL TETRIS | ANDSEETHINGSASIDO</title>
     <style>
+        :root {
+            --bg-color: #f0f0f3;
+            --panel-color: #ffffff;
+            --text-color: #1a1a1a;
+            --key-color: #e0e0e5;
+            --key-shadow: #bebeac;
+            --key-light: #ffffff;
+        }
+
         body {
             margin: 0;
             padding: 0;
-            background-color: #f7f7f9;
-            color: #111111;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Courier New', Courier, monospace; /* 工业复古字体 */
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -19,97 +28,192 @@
             overflow: hidden;
         }
 
-        /* 纯白工业极简外框 */
-        .game-container {
+        /* 游戏机主体：重工业风三维面板 */
+        .console-wrapper {
+            background-color: var(--panel-color);
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 20px 20px 60px #d9d9d9, -20px -20px 60px #ffffff;
+            border: 1px solid #e6e6e6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: opacity 0.5s ease; /* 用于照片切换淡出 */
+        }
+
+        /* 屏幕容器：内凹陷陷 */
+        .screen-container {
             position: relative;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
-            border: 4px solid #ffffff;
             background-color: #ffffff;
-            border-radius: 4px;
+            border: 10px solid #e0e0e5;
+            border-radius: 8px;
+            box-shadow: inset 5px 5px 15px rgba(0,0,0,0.1), inset -5px -5px 10px rgba(255,255,255,0.7);
+            overflow: hidden;
+            margin-bottom: 30px;
         }
 
         canvas {
             display: block;
-            background-color: #ffffff;
         }
 
-        /* 已完全隐藏左上角状态文字 */
-        .status-overlay {
-            display: none;
+        /* 物理按键区域 */
+        .controls-wrapper {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            width: 240px;
+            justify-items: center;
         }
+
+        /* 游戏机质感实体按键（拟物风 Neo-morphism） */
+        .key-btn {
+            width: 65px;
+            height: 65px;
+            background-color: var(--key-color);
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            color: #555;
+            font-weight: bold;
+            /* 悬浮态（未按下） */
+            box-shadow: 6px 6px 12px var(--key-shadow), -6px -6px 12px var(--key-light);
+            transition: all 0.1s ease;
+            -webkit-tap-highlight-color: transparent; /* 移除手机点击高亮 */
+            position: relative;
+        }
+
+        /* 按键按下态：内凹陷陷 */
+        .key-btn:active, .key-btn.pseudo-active {
+            box-shadow: inset 4px 4px 8px var(--key-shadow), inset -4px -4px 8px var(--key-light);
+            color: #1a1a1a;
+            transform: scale(0.96);
+        }
+
+        /* 方向键图标 */
+        .icon-up::before { content: '▲'; }
+        .icon-down::before { content: '▼'; }
+        .icon-left::before { content: '◄'; }
+        .icon-right::before { content: '►'; }
+
+        /* 布局调整 */
+        .key-up { grid-column: 2; }
+        .key-left { grid-column: 1; grid-row: 2; }
+        .key-down { grid-column: 2; grid-row: 2; }
+        .key-right { grid-column: 3; grid-row: 2; }
+
     </style>
 </head>
 <body>
 
-    <div class="game-container" id="gameContainer">
-        <div class="status-overlay" id="statusText"></div>
-        <canvas id="tetris"></canvas>
+    <!-- 游戏机主体容器 -->
+    <div class="console-wrapper" id="consoleApp">
+        <!-- 屏幕 -->
+        <div class="screen-container">
+            <canvas id="tetris"></canvas>
+        }
+        </div>
+
+        <!-- 物理控制面板 -->
+        <div class="controls-wrapper">
+            <button class="key-btn key-up" id="btnUp" data-key="up"><span class="icon-up"></span></button>
+            <button class="key-btn key-left" id="btnLeft" data-key="left"><span class="icon-left"></span></button>
+            <button class="key-btn key-down" id="btnDown" data-key="down"><span class="icon-down"></span></button>
+            <button class="key-btn key-right" id="btnRight" data-key="right"><span class="icon-right"></span></button>
+        </div>
     </div>
 
 <script>
     const canvas = document.getElementById('tetris');
     const ctx = canvas.getContext('2d');
-    const statusText = document.getElementById('statusText');
+    const consoleApp = document.getElementById('consoleApp');
 
-    // 📐 严格定义 6×6 艺术矩阵
+    // 📐 6×6 艺术矩阵
     const COLS = 6;
     const ROWS = 6;
-    const BLOCK_SIZE = 70; 
+    // 适配屏幕大小，略微缩小让按钮区域更宽敞
+    const BLOCK_SIZE = Math.min(60, (window.innerHeight * 0.5) / ROWS); 
 
     canvas.width = COLS * BLOCK_SIZE;
     canvas.height = ROWS * BLOCK_SIZE;
 
-    // 预加载 Logo
-    const logoImg = new Image();
-    logoImg.src = 'logo.png'; 
+    // ==========================================
+    // 🖼️ 多图循环系统配置
+    // ==========================================
+    // 请确保仓库根目录下有这些图片：logo1.png, logo2.png, logo3.png
+    const photoList = ['logo1.png', 'logo2.png', 'logo3.png'];
+    let currentPhotoIndex = 0;
+    
+    let logoImg = new Image();
     let logoLoaded = false;
-    logoImg.onload = () => { logoLoaded = true; };
 
-    // 初始化画布状态
+    // 加载当前照片的函数
+    function loadCurrentPhoto() {
+        logoLoaded = false;
+        logoImg.src = photoList[currentPhotoIndex];
+        logoImg.onload = () => { 
+            logoLoaded = true; 
+            // 每次换图，确保面板重新丝滑显现
+            consoleApp.style.opacity = 1;
+        };
+        logoImg.onerror = () => {
+            console.error(`无法加载图片: ${photoList[currentPhotoIndex]}，请检查文件名。`);
+            // 失败则尝试载入下一张，防止卡死
+            nextPhoto();
+        };
+    }
+
+    // 切换到下一张照片
+    function nextPhoto() {
+        currentPhotoIndex = (currentPhotoIndex + 1) % photoList.length;
+        // 游戏机面板先淡出
+        consoleApp.style.opacity = 0;
+        // 延迟 0.5 秒（等待淡出动画完毕）后重置游戏并载入新图
+        setTimeout(() => {
+            loadCurrentPhoto();
+            resetGameSystem(true); // 真实重置，回到自动演示
+        }, 500);
+    }
+
+    // 初始载入
+    loadCurrentPhoto();
+
+    // ==========================================
+
+    // 画布状态
     const board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
 
     let piece = null;
     let isAutoMode = true; 
     let dropCounter = 0;
-    let dropInterval = 150; 
+    let dropInterval = 180; // 自动演示速度
     let lastTime = 0;
-    let isFinished = false;
+    let isFinished = false; // 是否已经填满定格
+    let sequenceIndex = 0;
 
-    // 🎯 完美密铺序列生成器
+    // 🎯 完美密铺序列
     const perfectSequence = [
-        { matrix: [[1, 1], [1, 1]], x: 0 }, 
-        { matrix: [[1, 1], [1, 1]], x: 2 }, 
-        { matrix: [[1, 1], [1, 1]], x: 4 }, 
-        
-        { matrix: [[1, 1, 1]], x: 0 },       
-        { matrix: [[1, 1, 1]], x: 3 },       
-        
-        { matrix: [[1, 1], [1, 1]], x: 0 }, 
-        { matrix: [[1, 1], [1, 1]], x: 2 }, 
-        { matrix: [[1, 1]], x: 4 },          
-        { matrix: [[1, 1]], x: 4 },          
-        
+        { matrix: [[1, 1], [1, 1]], x: 0 }, { matrix: [[1, 1], [1, 1]], x: 2 }, { matrix: [[1, 1], [1, 1]], x: 4 }, 
+        { matrix: [[1, 1, 1]], x: 0 }, { matrix: [[1, 1, 1]], x: 3 },       
+        { matrix: [[1, 1], [1, 1]], x: 0 }, { matrix: [[1, 1], [1, 1]], x: 2 }, { matrix: [[1, 1]], x: 4 }, { matrix: [[1, 1]], x: 4 },          
         { matrix: [[1, 1, 1, 1, 1, 1]], x: 0 } 
     ];
-    let sequenceIndex = 0;
 
     function createPiece() {
         if (isAutoMode) {
-            if (sequenceIndex >= perfectSequence.length) {
-                return null; 
-            }
+            if (sequenceIndex >= perfectSequence.length) return null; 
             const p = perfectSequence[sequenceIndex++];
-            return {
-                matrix: p.matrix,
-                x: p.x,
-                y: 0
-            };
+            return { matrix: p.matrix, x: p.x, y: 0 };
         } else {
+            // 手动模式方块，优化：确保方块在全白网格中清晰可见
             const shapes = [
-                [[1, 1], [1, 1]],
-                [[1, 1, 1, 1]],
-                [[1, 1, 0], [0, 1, 1]],
-                [[1, 1, 1], [0, 1, 0]]
+                [[1, 1], [1, 1]], // O
+                [[1, 1, 1, 1]],  // I
+                [[1, 1, 1], [0, 1, 0]], // T
+                [[0, 1, 1], [1, 1, 0]]  // S
             ];
             const shape = shapes[Math.floor(Math.random() * shapes.length)];
             return {
@@ -124,9 +228,7 @@
         const [m, o] = [piece.matrix, piece];
         for (let r = 0; r < m.length; ++r) {
             for (let c = 0; c < m[r].length; ++c) {
-                if (m[r][c] !== 0 && (board[r + o.y] && board[r + o.y][c + o.x]) !== 0) {
-                    return true;
-                }
+                if (m[r][c] !== 0 && (board[r + o.y] && board[r + o.y][c + o.x]) !== 0) return true;
             }
         }
         return false;
@@ -149,15 +251,22 @@
             
             if (!isAutoMode) clearLines();
 
-            if (isAutoMode && checkFilled()) {
+            // 检查是否铺满（自动或手动）
+            if (checkFilled()) {
                 isFinished = true;
+                // 🚨 核心逻辑：定格两秒，然后自动切换到下一张照片
+                setTimeout(() => {
+                    nextPhoto();
+                }, 2000);
                 return;
             }
 
             piece = createPiece();
             
+            // 手动模式游戏结束处理
             if (!piece || collide(board, piece)) {
                 isFinished = true;
+                setTimeout(() => nextPhoto(), 2000); // 结束也切换图片
             }
         }
         dropCounter = 0;
@@ -185,20 +294,23 @@
 
     function autoPlayAI() {
         if (!piece || !isAutoMode || isFinished) return;
-        dropInterval = 40; 
+        dropInterval = 50; // 加速下落
     }
 
+    // 🎨 渲染引擎
     function drawBlock(x, y, isStatic) {
         const px = x * BLOCK_SIZE;
         const py = y * BLOCK_SIZE;
 
         if (isStatic) {
+            // 【固定的方块】：呈现背景 Logo 和 3D 浮雕质感
             ctx.save();
             ctx.beginPath();
             ctx.rect(px, py, BLOCK_SIZE, BLOCK_SIZE);
             ctx.clip();
 
             if (logoLoaded) {
+                // 等比例防拉伸裁剪算法
                 const canvasAspect = canvas.width / canvas.height;
                 const imgAspect = logoImg.width / logoImg.height;
                 let drawWidth, drawHeight, drawX, drawY;
@@ -215,34 +327,61 @@
                     drawY = (canvas.height - drawHeight) / 2;
                 }
 
+                // 绘制底层 Logo
                 ctx.drawImage(logoImg, drawX, drawY, drawWidth, drawHeight);
 
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+                // 叠加一层极轻微的白雾，让浮雕更柔和
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
+
             } else {
-                ctx.fillStyle = '#ffffff';
+                ctx.fillStyle = '#f0f0f3'; // 默认拟物白
                 ctx.fillRect(px, py, BLOCK_SIZE, BLOCK_SIZE);
             }
             ctx.restore();
 
-            ctx.strokeStyle = '#eaeaea';
+            // 极淡的艺术网格参考线
+            ctx.strokeStyle = '#e6e6eb';
             ctx.lineWidth = 1;
             ctx.strokeRect(px, py, BLOCK_SIZE, BLOCK_SIZE);
 
         } else {
-            ctx.fillStyle = '#ffffff';
-            ctx.fillRect(px, py, BLOCK_SIZE, BLOCK_SIZE);
-            
-            ctx.strokeStyle = '#f0f0f4';
-            ctx.lineWidth = 1;
-            ctx.strokeRect(px, py, BLOCK_SIZE, BLOCK_SIZE);
+            // 【玩家控制或演示中的动态方块】
+            // 💡 优化：显著提升清晰度。采用纯白实体填满，带有微弱霓虹边缘。
+            if (!isAutoMode) {
+                // 手动模式：高清晰亮白块
+                ctx.fillStyle = '#ffffff'; 
+                ctx.fillRect(px, py, BLOCK_SIZE, BLOCK_SIZE);
+                
+                // 鲜明的实体边缘
+                ctx.strokeStyle = '#3a3a3a'; 
+                ctx.lineWidth = 2;
+                ctx.strokeRect(px+1, py+1, BLOCK_SIZE-2, BLOCK_SIZE-2);
+                
+                // 霓虹发光效果（可选，增加先锋感）
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+                ctx.shadowBlur = 8;
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(px, py, BLOCK_SIZE, BLOCK_SIZE);
+                ctx.shadowBlur = 0; // 重置阴影
+
+            } else {
+                // 自动模式：保持纯白演示
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(px, py, BLOCK_SIZE, BLOCK_SIZE);
+                ctx.strokeStyle = '#f0f0f4';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(px, py, BLOCK_SIZE, BLOCK_SIZE);
+            }
         }
     }
 
     function draw() {
-        ctx.fillStyle = '#ffffff';
+        ctx.fillStyle = '#ffffff'; // 屏幕背景纯白
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+        // 背景网格线
         ctx.strokeStyle = '#f3f3f6';
         ctx.lineWidth = 1;
         for (let i = 0; i <= COLS; i++) {
@@ -281,36 +420,102 @@
         requestAnimationFrame(update);
     }
 
-    function startManualMode() {
+    // 系统重置函数
+    function resetGameSystem(backToAuto = false) {
         board.forEach(row => row.fill(0));
-        isAutoMode = false;
         isFinished = false;
-        dropInterval = 600; 
+        isAutoMode = backToAuto;
+        sequenceIndex = 0;
+        dropInterval = isAutoMode ? 180 : 800; // 玩家操控速度较慢
         piece = createPiece();
     }
 
-    document.getElementById('gameContainer').addEventListener('click', () => {
-        if (isAutoMode || isFinished) startManualMode();
-    });
+    function startManualMode() {
+        if (!isAutoMode && !isFinished) return; // 已经在手动模式了
+        resetGameSystem(false); // 重置并进入手动游玩
+    }
 
-    window.addEventListener('keydown', event => {
-        if (isAutoMode || isFinished) return;
-        if (event.key === 'ArrowLeft' || event.key === 'a') {
-            piece.x--; if (collide(board, piece)) piece.x++;
-        } else if (event.key === 'ArrowRight' || event.key === 'd') {
-            piece.x++; if (collide(board, piece)) piece.x--;
-        } else if (event.key === 'ArrowDown' || event.key === 's') {
-            playerDrop();
-        } else if (event.key === 'ArrowUp' || event.key === 'w') {
+    // ==========================================
+    // 🎮 实体按键控制逻辑
+    // ==========================================
+    const keys = {
+        left: () => { piece.x--; if (collide(board, piece)) piece.x++; },
+        right: () => { piece.x++; if (collide(board, piece)) piece.x--; },
+        down: () => { playerDrop(); },
+        up: () => { 
+            // 旋转方块
             const rotate = (matrix) => matrix[0].map((val, index) => matrix.map(row => row[index]).reverse());
             const oldMatrix = piece.matrix;
             piece.matrix = rotate(piece.matrix);
             if (collide(board, piece)) piece.matrix = oldMatrix;
         }
+    };
+
+    // 为实体按钮绑定触摸和点击事件
+    document.querySelectorAll('.key-btn').forEach(btn => {
+        const handleAction = (e) => {
+            e.preventDefault(); // 阻止浏览器默认行为和双击放大
+            if (isFinished) return;
+            if (isAutoMode) startManualMode(); // 任意按键触发手动游玩
+
+            const keyAction = btn.getAttribute('data-key');
+            if (keys[keyAction]) keys[keyAction]();
+        };
+
+        // 鼠标点击
+        btn.addEventListener('mousedown', handleAction);
+        // 手机触摸
+        btn.addEventListener('touchstart', handleAction);
     });
 
+    // ==========================================
+    // 🎹 键盘控制逻辑
+    // ==========================================
+    window.addEventListener('keydown', event => {
+        if (isFinished) return;
+        
+        const keyMap = {
+            'ArrowLeft': 'left', 'a': 'left',
+            'ArrowRight': 'right', 'd': 'right',
+            'ArrowDown': 'down', 's': 'down',
+            'ArrowUp': 'up', 'w': 'up'
+        };
+
+        const action = keyMap[event.key];
+        if (action) {
+            if (isAutoMode) startManualMode(); // 任意按键触发手动游玩
+            keys[action]();
+            
+            // 为对应的虚拟按键添加按下视觉效果
+            const btn = document.getElementById(`btn${action.charAt(0).toUpperCase() + action.slice(1)}`);
+            if (btn) btn.classList.add('pseudo-active');
+        }
+    });
+
+    // 键盘抬起时移除视觉效果
+    window.addEventListener('keyup', event => {
+        const keyMap = {
+            'ArrowLeft': 'Left', 'a': 'Left',
+            'ArrowRight': 'Right', 'd': 'Right',
+            'ArrowDown': 'Down', 's': 'Down',
+            'ArrowUp': 'Up', 'w': 'Up'
+        };
+        const action = keyMap[event.key];
+        if (action) {
+            const btn = document.getElementById(`btn${action}`);
+            if (btn) btn.classList.remove('pseudo-active');
+        }
+    });
+
+    // 屏幕点击也可触发手动游玩
+    canvas.addEventListener('click', () => {
+        if (isAutoMode || isFinished) startManualMode();
+    });
+
+    // 启动游戏时钟
     piece = createPiece();
     update();
+
 </script>
 </body>
 </html>
