@@ -3,28 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=none">
-    <title>RETRO BLUE HANDHELD | GAMING ART</title>
+    <title>RETRO BATTLE-DAMAGED HANDHELD</title>
     <style>
         :root {
             /* 深蓝色硬质塑料机身变量 */
-            --case-bg: #1e2942; 
-            --case-shadow: #111827;
-            --case-light: #374151;
+            --case-bg: #1a233a; 
+            --case-shadow: #0b0f19;
+            --case-light: #2e3b59;
 
             /* 复古酒红色实体按键变量 */
-            --btn-bg: #801d2c;
-            --btn-shadow: #4c111a;
-            --btn-light: #b93246;
+            --btn-bg: #731a27;
+            --btn-shadow: #3b0b12;
+            --btn-light: #a62b3e;
 
-            /* 屏幕边框及复古色调 */
-            --screen-frame: #111827;
-            --screen-bg: #e2e8f0; 
+            /* 工业黑边框 */
+            --screen-frame: #131924;
         }
 
         body {
             margin: 0;
             padding: 0;
-            background-color: #0f172a; /* 深色暗光背景，衬托掌机发光 */
+            background-color: #070a12; /* 极暗环境，凸显中古机身的轮廓 */
             color: #ffffff;
             font-family: 'Courier New', Courier, monospace;
             display: flex;
@@ -35,70 +34,117 @@
             overflow: hidden;
         }
 
-        /* 游戏机主体：复古深蓝色重工业塑料外壳 */
+        /* 游戏机主体：饱经沧桑的深蓝色磨损机身 */
         .console-wrapper {
             background-color: var(--case-bg);
-            padding: 30px 25px 40px 25px;
+            padding: 35px 28px 45px 28px;
             border-radius: 24px;
-            /* 极其硬朗的三维塑料外框阴影 */
+            
+            /* 核心：通过多重复杂的渐变重叠，模拟塑料褪色、污渍与表面刮痕 */
+            background-image: 
+                /* 磨损痕迹1：右上角塑料摩擦泛白 */
+                radial-gradient(circle at 90% 10%, rgba(255, 255, 255, 0.05) 0%, transparent 40%),
+                /* 磨损痕迹2：边缘老旧氧化斑驳 */
+                radial-gradient(circle at 10% 85%, rgba(0, 0, 0, 0.3) 0%, transparent 50%),
+                /* 刮痕模拟线1 */
+                linear-gradient(135deg, transparent 45%, rgba(255,255,255,0.07) 46%, rgba(255,255,255,0.07) 47%, transparent 48%),
+                /* 刮痕模拟线2 */
+                linear-gradient(210deg, transparent 70%, rgba(0,0,0,0.4) 71%, rgba(0,0,0,0.4) 72%, transparent 73%);
+
+            /* 极其沉重的工业立体阴影 */
             box-shadow: 
-                15px 25px 50px rgba(0, 0, 0, 0.6),
-                inset 2px 2px 4px var(--case-light),
-                inset -3px -3px 6px var(--case-shadow);
-            border: 1px solid #1e293b;
+                20px 30px 60px rgba(0, 0, 0, 0.7),
+                inset 3px 3px 6px var(--case-light),
+                inset -4px -4px 8px var(--case-shadow);
+            border: 1px solid #161e30;
             display: flex;
             flex-direction: column;
             align-items: center;
             position: relative;
         }
 
-        /* 工业风凹槽细节线 */
-        .console-wrapper::before {
+        /* 掌机下方的复古扬声器栅格孔 (注塑磨损感) */
+        .console-wrapper::after {
             content: "";
-            position: absolute;
-            top: 15px;
-            width: 80%;
-            height: 2px;
-            background: var(--case-shadow);
-            opacity: 0.4;
+            margin-top: 25px;
+            width: 70px;
+            height: 15px;
+            opacity: 0.6;
+            background: repeating-linear-gradient(90deg, var(--case-shadow), var(--case-shadow) 4px, transparent 4px, transparent 10px);
+            border-bottom: 1px solid var(--case-light);
         }
 
-        /* 屏幕外框：大黑边卡槽 */
+        /* 屏幕外框：大黑边卡槽（带岁月划痕） */
         .screen-frame {
             background-color: var(--screen-frame);
-            padding: 18px 18px 24px 18px;
+            padding: 20px 20px 26px 20px;
             border-radius: 12px;
             box-shadow: 
-                inset 3px 3px 10px rgba(0,0,0,0.8),
-                0 2px 4px rgba(255,255,255,0.05);
-            margin-bottom: 35px;
+                inset 4px 4px 12px rgba(0,0,0,0.9),
+                0 2px 4px rgba(255,255,255,0.04);
+            margin-bottom: 25px;
             position: relative;
+            background-image: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.02) 0%, transparent 60%);
         }
 
-        /* 屏幕内部容器：仅在此处处理换图淡出，防止整机闪烁 */
+        /* 屏幕外部镜面：重现真实掌机的反光与防眩光图层 */
         .screen-container {
             position: relative;
-            background-color: var(--screen-bg);
             border-radius: 4px;
             overflow: hidden;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+            /* 屏幕内凹阴影 + 老旧液晶的烧屏边缘暗角 (Vignette) */
+            box-shadow: 
+                inset 0 0 15px rgba(0,0,0,0.6),
+                0 0 4px rgba(0,0,0,0.5);
         }
 
-        /* 专门用于屏幕切换的滤镜层 */
+        /* 真实游戏机 LCD 屏幕硬件栅格线覆盖层（核心视觉优化） */
+        .screen-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* 横向微细扫描线 */
+            background: repeating-linear-gradient(
+                rgba(0, 0, 0, 0.13) 0px,
+                rgba(0, 0, 0, 0.13) 1px,
+                transparent 1px,
+                transparent 3px
+            );
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        /* 屏幕反光层：假装折射出房间里的一道微弱环境光 */
+        .screen-container::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(115deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 30%, transparent 60%);
+            pointer-events: none;
+            z-index: 6;
+        }
+
+        /* 局部换图专用的信号弱化滤镜层 */
         .screen-glitch-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #000000;
+            background-color: #0b111e; /* 贴合原装LCD断电灰黑色 */
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.4s ease-in-out;
+            transition: opacity 0.35s ease-in-out;
             z-index: 10;
         }
         .screen-glitch-overlay.fade-out {
-            opacity: 0.85; /* 屏幕变暗切换 */
+            opacity: 0.9; 
         }
 
         canvas {
@@ -112,9 +158,10 @@
             gap: 16px;
             width: 220px;
             justify-items: center;
+            margin-top: 10px;
         }
 
-        /* 经典掌机复古红色按键 */
+        /* 经典掌机红按键（带包浆油光感） */
         .key-btn {
             width: 62px;
             height: 62px;
@@ -125,26 +172,25 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 18px;
-            color: rgba(255, 255, 255, 0.7);
-            /* 坚挺的物理按键悬浮高光阴影 */
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.55);
+            /* 多重阴影：边缘高光剥落露白 + 深沉物理基座阴影 */
             box-shadow: 
-                4px 6px 10px rgba(0, 0, 0, 0.5),
-                inset 2px 2px 3px var(--btn-light),
-                inset -3px -3px 4px var(--btn-shadow);
-            transition: all 0.05s ease;
+                4px 6px 12px rgba(0, 0, 0, 0.6),
+                inset 1px 2px 2px var(--btn-light),
+                inset -3px -3px 5px var(--btn-shadow);
+            transition: all 0.04s ease;
             -webkit-tap-highlight-color: transparent;
-            position: relative;
         }
 
-        /* 按键真实按下效果 */
+        /* 按键真实踩踏动作 */
         .key-btn:active, .key-btn.pseudo-active {
             box-shadow: 
-                1px 1px 2px rgba(0, 0, 0, 0.3),
-                inset 3px 3px 6px var(--btn-shadow),
+                1px 1px 2px rgba(0, 0, 0, 0.4),
+                inset 4px 4px 7px var(--btn-shadow),
                 inset -1px -1px 2px var(--btn-light);
-            color: #ffffff;
-            transform: translateY(2px) scale(0.97);
+            color: rgba(255, 255, 255, 0.9);
+            transform: translateY(2.5px) scale(0.96);
         }
 
         /* 方向键白字图标 */
@@ -162,18 +208,15 @@
 </head>
 <body>
 
-    <!-- 掌机机身 -->
+    <!-- 斑驳工业掌机 -->
     <div class="console-wrapper">
-        <!-- 屏幕黑边框 -->
         <div class="screen-frame">
-            <!-- 屏幕显示区域 -->
             <div class="screen-container">
                 <div class="screen-glitch-overlay" id="screenOverlay"></div>
                 <canvas id="tetris"></canvas>
             </div>
         </div>
 
-        <!-- 经典红十字控制按键 -->
         <div class="controls-wrapper">
             <button class="key-btn key-up" id="btnUp" data-key="up"><span class="icon-up"></span></button>
             <button class="key-btn key-left" id="btnLeft" data-key="left"><span class="icon-left"></span></button>
@@ -190,7 +233,7 @@
     // 📐 6×6 艺术矩阵
     const COLS = 6;
     const ROWS = 6;
-    const BLOCK_SIZE = Math.min(58, (window.innerHeight * 0.45) / ROWS); 
+    const BLOCK_SIZE = Math.min(56, (window.innerHeight * 0.43) / ROWS); 
 
     canvas.width = COLS * BLOCK_SIZE;
     canvas.height = ROWS * BLOCK_SIZE;
@@ -207,7 +250,6 @@
         logoImg.src = photoList[currentPhotoIndex];
         logoImg.onload = () => { 
             logoLoaded = true; 
-            // 图片加载完毕后，移除屏幕变暗遮罩
             screenOverlay.classList.remove('fade-out');
         };
         logoImg.onerror = () => {
@@ -216,21 +258,19 @@
         };
     }
 
-    // 切换下一张照片（仅屏幕动画）
     function nextPhoto() {
         currentPhotoIndex = (currentPhotoIndex + 1) % photoList.length;
-        // 仅仅让屏幕内部覆盖层变暗，游戏机身完全不闪烁
-        screenOverlay.classList.add('fade-out');
+        screenOverlay.classList.add('fade-out'); // 仅屏幕内部淡出变暗
         
         setTimeout(() => {
             loadCurrentPhoto();
-            resetGameSystem(true); // 真实重置回归自动演示
-        }, 400); 
+            resetGameSystem(true); 
+        }, 350); 
     }
 
     loadCurrentPhoto();
 
-    // 矩阵数据与游戏引擎状态
+    // 游戏核心数据
     const board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
     let piece = null;
     let isAutoMode = true; 
@@ -297,7 +337,7 @@
 
             if (checkFilled()) {
                 isFinished = true;
-                setTimeout(() => { nextPhoto(); }, 2000); // 满屏定格2秒换图
+                setTimeout(() => { nextPhoto(); }, 2000); 
                 return;
             }
 
@@ -336,15 +376,18 @@
         dropInterval = 50; 
     }
 
-    // 🎨 新复古滤镜方块绘制
+    // 🎨 模拟硬件 LCD 像素物理方块绘制
     function drawBlock(x, y, isStatic) {
-        const px = x * BLOCK_SIZE;
-        const py = y * BLOCK_SIZE;
+        // 为了模拟液晶屏幕方块之间的缝隙，收缩 1.5 像素的绘制范围
+        const gap = 1.5;
+        const px = x * BLOCK_SIZE + gap;
+        const py = y * BLOCK_SIZE + gap;
+        const size = BLOCK_SIZE - gap * 2;
 
         if (isStatic) {
             ctx.save();
             ctx.beginPath();
-            ctx.rect(px, py, BLOCK_SIZE, BLOCK_SIZE);
+            ctx.rect(px, py, size, size);
             ctx.clip();
 
             if (logoLoaded) {
@@ -365,38 +408,39 @@
                 }
 
                 ctx.drawImage(logoImg, drawX, drawY, drawWidth, drawHeight);
-                // 淡淡的电子偏光滤镜
-                ctx.fillStyle = 'rgba(226, 232, 240, 0.15)';
+                
+                // 工业灰绿滤镜：给予底层 Logo 极强的任天堂式旧液晶发黄发绿感
+                ctx.fillStyle = 'rgba(148, 163, 184, 0.25)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             } else {
-                ctx.fillStyle = '#cbd5e1';
-                ctx.fillRect(px, py, BLOCK_SIZE, BLOCK_SIZE);
+                ctx.fillStyle = '#8ba1b5';
+                ctx.fillRect(px, py, size, size);
             }
             ctx.restore();
 
-            // 契合复古屏幕的极细电子分隔线
-            ctx.strokeStyle = 'rgba(0, 0, 0, 0.08)';
+            // 模拟液晶基底凹陷质感（内黑外轻白线）
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.18)';
             ctx.lineWidth = 1;
-            ctx.strokeRect(px, py, BLOCK_SIZE, BLOCK_SIZE);
+            ctx.strokeRect(px, py, size, size);
 
         } else {
-            // 下落方块：为了在绿色/白调电子屏上醒目，采用强烈的纯白与黑色实体轮廓线
+            // 下落方块：采用强烈的复古高亮电子白，四周有一层黑色的液晶像素封装边缘
             ctx.fillStyle = '#ffffff'; 
-            ctx.fillRect(px, py, BLOCK_SIZE, BLOCK_SIZE);
+            ctx.fillRect(px, py, size, size);
             
-            ctx.strokeStyle = '#111827'; 
-            ctx.lineWidth = 2.5; // 加粗轮廓，完美识别
-            ctx.strokeRect(px + 1.2, py + 1.2, BLOCK_SIZE - 2.4, BLOCK_SIZE - 2.4);
+            ctx.strokeStyle = '#0f172a'; 
+            ctx.lineWidth = 2; 
+            ctx.strokeRect(px + 0.5, py + 0.5, size - 1, size - 1);
         }
     }
 
     function draw() {
-        // 经典复古偏冷灰绿色的屏幕底色
-        ctx.fillStyle = '#cbd5e1'; 
+        // 复古 LCD 底色：带有微量灰黄的工业冷色调液晶底色
+        ctx.fillStyle = '#a2b4c7'; 
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // 电子网格参考线
-        ctx.strokeStyle = '#94a3b8';
+        // 电子像素点阵微弱分割网格
+        ctx.strokeStyle = '#90a4b7';
         ctx.lineWidth = 0.5;
         for (let i = 0; i <= COLS; i++) {
             ctx.beginPath(); ctx.moveTo(i * BLOCK_SIZE, 0); ctx.lineTo(i * BLOCK_SIZE, canvas.height); ctx.stroke();
@@ -448,7 +492,6 @@
         resetGameSystem(false); 
     }
 
-    // 按键内核映射
     const keys = {
         left: () => { piece.x--; if (collide(board, piece)) piece.x++; },
         right: () => { piece.x++; if (collide(board, piece)) piece.x--; },
@@ -461,7 +504,6 @@
         }
     };
 
-    // 绑定物理按钮事件
     document.querySelectorAll('.key-btn').forEach(btn => {
         const handleAction = (e) => {
             e.preventDefault(); 
@@ -475,7 +517,6 @@
         btn.addEventListener('touchstart', handleAction);
     });
 
-    // 键盘操作绑定
     window.addEventListener('keydown', event => {
         if (isFinished) return;
         const keyMap = {
