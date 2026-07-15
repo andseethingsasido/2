@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WHITE MINIMALIST TETRIS | ANDSEETHINGSASIDO</title>
+    <title>WHITE MINIMALIST TETRIS 6X6</title>
     <style>
         body {
             margin: 0;
             padding: 0;
-            background-color: #030303;
-            color: #ffffff;
+            background-color: #f7f7f9;
+            color: #111111;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             display: flex;
             flex-direction: column;
@@ -17,29 +17,30 @@
             align-items: center;
             min-height: 100vh;
             overflow: hidden;
-            background-image: radial-gradient(circle at center, #111111 0%, #030303 100%);
         }
 
-        /* 游戏主容器：极简黑白线条 */
+        /* 纯白工业极简外框 */
         .game-container {
             position: relative;
-            box-shadow: 0 0 50px rgba(255, 255, 255, 0.02);
-            border: 2px solid #222222;
-            background-color: #000000;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
+            border: 4px solid #ffffff;
+            background-color: #ffffff;
+            border-radius: 4px;
         }
 
         canvas {
             display: block;
+            background-color: #ffffff;
         }
 
-        /* 极简工业状态文字 */
+        /* 极致现代感的浅灰色微标 */
         .status-overlay {
             position: absolute;
             top: 15px;
             left: 15px;
-            font-size: 10px;
+            font-size: 9px;
             letter-spacing: 2px;
-            color: #444444;
+            color: #b0b0b5;
             text-transform: uppercase;
             pointer-events: none;
             z-index: 10;
@@ -49,7 +50,7 @@
 <body>
 
     <div class="game-container" id="gameContainer">
-        <div class="status-overlay" id="statusText">SYSTEM // GRID_8X8_AUTO</div>
+        <div class="status-overlay" id="statusText">SYSTEM // PURE_WHITE_6X6</div>
         <canvas id="tetris"></canvas>
     </div>
 
@@ -58,39 +59,75 @@
     const ctx = canvas.getContext('2d');
     const statusText = document.getElementById('statusText');
 
-    // 📐 严格重构为 8×8 的完美正方形阵列
-    const COLS = 8;
-    const ROWS = 8;
-    const BLOCK_SIZE = 55; // 适配 8x8 布局，放大方块让画面更饱满
+    // 📐 严格定义 6×6 艺术矩阵
+    const COLS = 6;
+    const ROWS = 6;
+    const BLOCK_SIZE = 70; // 适当放大，让 6x6 画面在屏幕中央更具张力
 
     canvas.width = COLS * BLOCK_SIZE;
     canvas.height = ROWS * BLOCK_SIZE;
 
-    // 预加载 Logo 图片
+    // 预加载 Logo
     const logoImg = new Image();
     logoImg.src = 'logo.png'; 
     let logoLoaded = false;
     logoImg.onload = () => { logoLoaded = true; };
 
-    // 网格数据
+    // 初始化画布状态
     const board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
 
     let piece = null;
     let isAutoMode = true; 
     let dropCounter = 0;
-    let dropInterval = 120; 
+    let dropInterval = 150; 
     let lastTime = 0;
     let isFinished = false;
 
-    // 确保自动铺满的完美几何体包
+    // 🎯 完美密铺序列生成器（消灭任何偶发性空隙）
+    // 通过预先计算好的工业块组合，确保在 6x6 的极小空间内做到 100% 成功率铺满
+    const perfectSequence = [
+        { matrix: [[1, 1], [1, 1]], x: 0 }, // 左下角 2x2
+        { matrix: [[1, 1], [1, 1]], x: 2 }, // 中下 2x2
+        { matrix: [[1, 1], [1, 1]], x: 4 }, // 右下 2x2（至此填满底部 2 行）
+        
+        { matrix: [[1, 1, 1]], x: 0 },       // 第 3 行左侧 1x3 条
+        { matrix: [[1, 1, 1]], x: 3 },       // 第 3 行右侧 1x3 条（填满第 3 行）
+        
+        { matrix: [[1, 1], [1, 1]], x: 0 }, // 第 4-5 行左侧 2x2
+        { matrix: [[1, 1], [1, 1]], x: 2 }, // 第 4-5 行中部 2x2
+        { matrix: [[1, 1]], x: 4 },          // 第 4 行右侧 1x2 横条
+        { matrix: [[1, 1]], x: 4 },          // 第 5 行右侧 1x2 横条（填满第 4、5 行）
+        
+        { matrix: [[1, 1, 1, 1, 1, 1]], x: 0 } // 封顶 1x6 天际线长条（全盘完美收尾）
+    ];
+    let sequenceIndex = 0;
+
     function createPiece() {
-        // 自动模式下只生成最规整的 2x2 方块 和 1x4 长条，确保完美闭合
-        const shape = Math.random() > 0.5 ? [[1, 1], [1, 1]] : [[1, 1, 1, 1]];
-        return {
-            matrix: shape,
-            x: Math.floor((COLS - shape[0].length) / 2),
-            y: 0
-        };
+        if (isAutoMode) {
+            if (sequenceIndex >= perfectSequence.length) {
+                return null; // 砌砖完毕
+            }
+            const p = perfectSequence[sequenceIndex++];
+            return {
+                matrix: p.matrix,
+                x: p.x,
+                y: 0
+            };
+        } else {
+            // 手动模式随机生成基础纯白块
+            const shapes = [
+                [[1, 1], [1, 1]],
+                [[1, 1, 1, 1]],
+                [[1, 1, 0], [0, 1, 1]],
+                [[1, 1, 1], [0, 1, 0]]
+            ];
+            const shape = shapes[Math.floor(Math.random() * shapes.length)];
+            return {
+                matrix: shape,
+                x: Math.floor((COLS - shape[0].length) / 2),
+                y: 0
+            };
+        }
     }
 
     function collide(board, piece) {
@@ -124,14 +161,15 @@
 
             if (isAutoMode && checkFilled()) {
                 isFinished = true;
-                statusText.textContent = "MATRIX LOCKED.";
-                statusText.style.color = "#666666";
+                statusText.textContent = "MATRIX LOCKED // PURE WHITE";
                 return;
             }
+
             piece = createPiece();
-            if (collide(board, piece)) {
+            
+            if (!piece || collide(board, piece)) {
                 isFinished = true;
-                statusText.textContent = "COMPLETED // OVERFLOW";
+                statusText.textContent = "COMPLETED";
             }
         }
         dropCounter = 0;
@@ -157,61 +195,38 @@
         return true;
     }
 
-    // 8x8 高精准自动砌砖算法
+    // 自动对齐引导（确保落点完美无瑕）
     function autoPlayAI() {
         if (!piece || !isAutoMode || isFinished) return;
-        let targetRow = -1, targetCol = -1, found = false;
         
-        // 自底向上搜索空缺
-        for (let r = ROWS - 1; r >= 0; r--) {
-            for (let c = 0; c < COLS; c++) {
-                if (board[r][c] === 0) {
-                    targetRow = r; targetCol = c; found = true; break;
-                }
-            }
-            if (found) break;
-        }
-        if (!found) return;
-
-        // 水平对齐空缺位置
-        if (piece.x < targetCol) {
-            piece.x++; if (collide(board, piece)) piece.x--;
-        } else if (piece.x > targetCol) {
-            piece.x--; if (collide(board, piece)) piece.x++;
-        }
-        
-        // 锁定时加速下落，对齐时保持稳定节奏
-        dropInterval = (piece.x === targetCol) ? 30 : 120;
+        // 由于预设了完美密铺阵列，AI 只需负责在方块下落到预定 X 轴前提供极致下落速度
+        dropInterval = 40; 
     }
 
-    // 🎨 纯白极简方块渲染
+    // 🎨 全白极简主义方块绘制
     function drawBlock(x, y, isStatic) {
         const px = x * BLOCK_SIZE;
         const py = y * BLOCK_SIZE;
 
         if (isStatic) {
-            // 【固定后的方块】：纯白色，背后衬托等比例不失真的 Logo
+            // 固定区域：背景无损透出 logo，并罩上一层高级的白雾质感
             ctx.save();
-            
-            // 建立方块物理区裁剪
             ctx.beginPath();
             ctx.rect(px, py, BLOCK_SIZE, BLOCK_SIZE);
             ctx.clip();
 
             if (logoLoaded) {
-                // 🔒 【等比例防变形算法】 (Aspect Ratio Protection)
+                // 🔒 智能等比例防拉伸算法
                 const canvasAspect = canvas.width / canvas.height;
                 const imgAspect = logoImg.width / logoImg.height;
                 let drawWidth, drawHeight, drawX, drawY;
 
                 if (imgAspect > canvasAspect) {
-                    // 图片过宽，以高度为基准缩放，水平居中裁剪
                     drawHeight = canvas.height;
                     drawWidth = canvas.height * imgAspect;
                     drawX = (canvas.width - drawWidth) / 2;
                     drawY = 0;
                 } else {
-                    // 图片过高，以宽度为基准缩放，垂直居中裁剪
                     drawWidth = canvas.width;
                     drawHeight = canvas.width / imgAspect;
                     drawX = 0;
@@ -220,41 +235,40 @@
 
                 ctx.drawImage(logoImg, drawX, drawY, drawWidth, drawHeight);
 
-                // 叠加一层高级的白色滤镜，使底层照片融合成“白底极简纹理”
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                // 纯白高光图层叠加，将色彩图片转化为高端的“白底版画”视觉
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             } else {
-                // 若没有 Logo 则显示最纯粹的现代主义冷白
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(px, py, BLOCK_SIZE, BLOCK_SIZE);
             }
             ctx.restore();
 
-            // 极细的暗黑色方块拼接缝，让白色方块的模块化矩阵感拉满
-            ctx.strokeStyle = '#000000';
-            ctx.lineWidth = 1.5;
+            // 极轻量的高级浅白分割线
+            ctx.strokeStyle = '#eaeaea';
+            ctx.lineWidth = 1;
             ctx.strokeRect(px, py, BLOCK_SIZE, BLOCK_SIZE);
 
         } else {
-            // 【下落中的方块】：绝对的纯白色
+            // 下落中的实体方块：纯净的实心冷白块
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(px, py, BLOCK_SIZE, BLOCK_SIZE);
             
-            // 拼接线
-            ctx.strokeStyle = '#000000';
-            ctx.lineWidth = 1.5;
+            // 边缘阴影线隔开未落地的方块
+            ctx.strokeStyle = '#f0f0f4';
+            ctx.lineWidth = 1;
             ctx.strokeRect(px, py, BLOCK_SIZE, BLOCK_SIZE);
         }
     }
 
     function draw() {
-        // 纯哑光黑背景
-        ctx.fillStyle = '#0a0a0b';
+        // 清空画布为全白底色
+        ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // 极淡的暗底参考网格
-        ctx.strokeStyle = '#141416';
-        ctx.lineWidth = 0.5;
+        // 极淡的艺术网格参考线
+        ctx.strokeStyle = '#f3f3f6';
+        ctx.lineWidth = 1;
         for (let i = 0; i <= COLS; i++) {
             ctx.beginPath(); ctx.moveTo(i * BLOCK_SIZE, 0); ctx.lineTo(i * BLOCK_SIZE, canvas.height); ctx.stroke();
         }
@@ -262,14 +276,14 @@
             ctx.beginPath(); ctx.moveTo(0, j * BLOCK_SIZE); ctx.lineTo(canvas.width, j * BLOCK_SIZE); ctx.stroke();
         }
 
-        // 绘制固定的白色阵列
+        // 绘制底层固定方块
         board.forEach((row, y) => {
             row.forEach((value, x) => {
                 if (value !== 0) drawBlock(x, y, true);
             });
         });
 
-        // 绘制活动的白色动态块
+        // 绘制下落动态方块
         if (piece && !isFinished) {
             piece.matrix.forEach((row, y) => {
                 row.forEach((value, x) => {
@@ -297,12 +311,12 @@
         board.forEach(row => row.fill(0));
         isAutoMode = false;
         isFinished = false;
-        dropInterval = 800; // 玩家操控时恢复舒适的慢速
+        dropInterval = 600; 
         statusText.textContent = "MANUAL MODE // ACTIVE";
-        statusText.style.color = "#ffffff";
         piece = createPiece();
     }
 
+    // 交互响应：点击画面切换至日常操作模式
     document.getElementById('gameContainer').addEventListener('click', () => {
         if (isAutoMode || isFinished) startManualMode();
     });
