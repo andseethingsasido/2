@@ -3,197 +3,338 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>COLLECTION | ASIDI</title>
+    <title>TETRIS | ANDSEETHINGSASIDO</title>
     <style>
-        /* 1. 奢侈品极简黑白风格 */
         body {
             margin: 0;
             padding: 0;
-            background-color: #ffffff;
-            color: #111111;
-            font-family: "Didot", "Bodoni MT", "Cinzel", "Times New Roman", serif;
-            letter-spacing: 2px;
-            -webkit-font-smoothing: antialiased;
-        }
-
-        /* 2. 优雅的顶部导航栏 */
-        header {
-            padding: 30px 50px;
+            background-color: #050505;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            border-bottom: 1px solid #f2f2f2;
+            min-height: 100vh;
+            overflow: hidden;
         }
 
-        .brand-logo {
-            font-size: 24px;
-            font-weight: bold;
-            text-transform: uppercase;
-            text-decoration: none;
-            color: #111111;
+        /* 游戏主容器 */
+        .game-container {
+            position: relative;
+            box-shadow: 0 0 50px rgba(255, 255, 255, 0.05);
+            border: 2px solid #1a1a1a;
+            background-color: #000000;
         }
 
-        .nav-links a {
-            margin-left: 30px;
-            text-decoration: none;
+        canvas {
+            display: block;
+        }
+
+        /* 挂机/自动演示状态提示 */
+        .status-overlay {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 11px;
+            letter-spacing: 2px;
             color: #666666;
-            font-size: 13px;
             text-transform: uppercase;
+            pointer-events: none;
             transition: color 0.3s;
         }
-        .nav-links a:hover {
-            color: #111111;
+        .status-overlay.active {
+            color: #00ffcc;
+            animation: pulse 2s infinite;
         }
 
-        /* 3. 商品大货架容器 */
-        .container {
-            max-width: 1200px;
-            margin: 60px auto;
-            padding: 0 20px;
-        }
-
-        .collection-title {
-            text-align: center;
-            font-size: 26px;
-            margin-bottom: 60px;
-            text-transform: uppercase;
-            font-weight: 300;
-        }
-
-        .product-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 50px;
-        }
-
-        .product-card {
-            text-align: center;
-        }
-
-        /* 4. 核心：大牌感丝滑多图横向滑动区 */
-        .product-image-slider {
-            background-color: #fcfcfc;
-            aspect-ratio: 3 / 4; /* 奢侈品画册经典的 3:4 比例 */
-            display: flex;
-            overflow-x: auto; /* 激活横向滚动 */
-            scroll-snap-type: x mandatory; /* 手机滑动自动磁吸对齐 */
-            scroll-behavior: smooth;
-            margin-bottom: 20px;
-            border-radius: 2px;
-        }
-
-        /* 隐藏原生滚动条，保持绝对干净的视觉感 */
-        .product-image-slider::-webkit-scrollbar {
-            display: none;
-        }
-        .product-image-slider {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-
-        /* 确保滑动的每张细节图都完美铺满 */
-        .product-image-slider img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            flex-shrink: 0;
-            scroll-snap-align: start;
-            user-select: none;
-            -webkit-user-drag: none;
-        }
-
-        /* 5. 文字与信息排版 */
-        .product-name {
-            font-size: 14px;
-            margin: 15px 0 6px 0;
-            text-transform: uppercase;
-            font-weight: 400;
-        }
-
-        .product-price {
-            font-size: 13px;
-            color: #888888;
-            margin-bottom: 20px;
-        }
-
-        /* 6. 高级定制购买按钮 */
-        .buy-btn {
-            display: inline-block;
-            background-color: #111111;
-            color: #ffffff;
-            padding: 12px 35px;
-            font-size: 11px;
-            text-transform: uppercase;
-            text-decoration: none;
-            border: 1px solid #111111;
-            transition: all 0.3s ease;
-        }
-        .buy-btn:hover {
-            background-color: #ffffff;
-            color: #111111;
+        @keyframes pulse {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
         }
     </style>
 </head>
 <body>
 
-    <!-- 顶部导航 -->
-    <header>
-        <a href="#" class="brand-logo">ASIDI</a>
-        <div class="nav-links">
-            <a href="#">Shop</a>
-            <a href="#">Story</a>
-            <a href="#">Contact</a>
-        </div>
-    </header>
-
-    <!-- 动态商品区 -->
-    <div class="container">
-        <h2 class="collection-title">New Arrival / Lookbook</h2>
-        
-        <!-- JavaScript 会自动来这里抓数据并生成卡片 -->
-        <div class="product-grid" id="mainShopGrid"></div>
+    <div class="game-container" id="gameContainer">
+        <div class="status-overlay" id="statusText">Demo Mode (Click to Play)</div>
+        <canvas id="tetris"></canvas>
     </div>
 
-    <script>
-        // 核心引擎：异步读取同仓库下的 products.json 文件
-        fetch('products.json')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('网络响应似乎有点问题');
+<script>
+    const canvas = document.getElementById('tetris');
+    const ctx = canvas.getContext('2d');
+    const statusText = document.getElementById('statusText');
+
+    // 基础配置
+    const COLS = 10;
+    const ROWS = 20;
+    const BLOCK_SIZE = 32; // 每个方块 32 像素
+
+    canvas.width = COLS * BLOCK_SIZE;
+    canvas.height = ROWS * BLOCK_SIZE;
+
+    // 预加载你的 Logo 照片（请保证同级目录下有 logo.png）
+    const logoImg = new Image();
+    logoImg.src = 'logo.png'; 
+    let logoLoaded = false;
+    logoImg.onload = () => { logoLoaded = true; };
+
+    // 游戏地图网格（0表示空，1表示已被固定的金属堆砌块）
+    const board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+
+    // 俄罗斯方块形状定义
+    const SHAPES = [
+        [[1, 1, 1, 1]], // I
+        [[1, 1, 1], [0, 1, 0]], // T
+        [[1, 1, 1], [1, 0, 0]], // L
+        [[1, 1, 1], [0, 0, 1]], // J
+        [[1, 1], [1, 1]], // O
+        [[1, 1, 0], [0, 1, 1]], // Z
+        [[0, 1, 1], [1, 1, 0]]  // S
+    ];
+
+    let piece = null;
+    let isAutoMode = true; // 默认开启挂机自动演示
+    let dropCounter = 0;
+    let dropInterval = 1000; // 下落速度(毫秒)
+    let lastTime = 0;
+    let isGameOver = false;
+
+    // 生成新方块
+    function createPiece() {
+        const shape = SHAPES[Math.floor(Math.random() * SHAPES.length)];
+        return {
+            matrix: shape,
+            x: Math.floor((COLS - shape[0].length) / 2),
+            y: 0
+        };
+    }
+
+    // 碰撞检测
+    function collide(board, piece) {
+        const [m, o] = [piece.matrix, piece];
+        for (let r = 0; r < m.length; ++r) {
+            for (let c = 0; c < m[r].length; ++c) {
+                if (m[r][c] !== 0 &&
+                   (board[r + o.y] &&
+                    board[r + o.y][c + o.x]) !== 0) {
+                    return true;
                 }
-                return response.json();
-            })
-            .then(productsData => {
-                const shopGrid = document.getElementById('mainShopGrid');
+            }
+        }
+        return false;
+    }
 
-                // 开始循环读取账本里的每一件衣服/包包
-                productsData.forEach(product => {
-                    const card = document.createElement('div');
-                    card.className = 'product-card';
-
-                    // 循环为当前商品抓取多张滑动细节图
-                    let sliderImagesHtml = '';
-                    product.images.forEach(imgUrl => {
-                        sliderImagesHtml += `<img src="${imgUrl}" alt="${product.name}">`;
-                    });
-
-                    // 编织进货架盒子
-                    card.innerHTML = `
-                        <div class="product-image-slider">
-                            ${sliderImagesHtml}
-                        </div>
-                        <div class="product-name">${product.name}</div>
-                        <div class="product-price">${product.price}</div>
-                        <a href="${product.link}" class="buy-btn" target="_blank">Inquire / Buy</a>
-                    `;
-
-                    shopGrid.appendChild(card);
-                });
-            })
-            .catch(error => {
-                console.error('动态账本读取失败，错误信息:', error);
+    // 将方块固定到地图上
+    function merge(board, piece) {
+        piece.matrix.forEach((row, r) => {
+            row.forEach((value, c) => {
+                if (value !== 0) {
+                    board[r + piece.y][c + piece.x] = 1;
+                }
             });
-    </script>
+        });
+    }
 
+    // 消除满行
+    function clearLines() {
+        outer: for (let r = ROWS - 1; r >= 0; --r) {
+            for (let c = 0; c < COLS; ++c) {
+                if (board[r][c] === 0) {
+                    continue outer;
+                }
+            }
+            const row = board.splice(r, 1)[0].fill(0);
+            board.unshift(row);
+            ++r;
+        }
+    }
+
+    // 下落逻辑
+    function playerDrop() {
+        piece.y++;
+        if (collide(board, piece)) {
+            piece.y--;
+            merge(board, piece);
+            clearLines();
+            piece = createPiece();
+            if (collide(board, piece)) {
+                // 填满了，游戏结束，清空并重新开始自动演示
+                isGameOver = true;
+                setTimeout(resetGame, 1500);
+            }
+        }
+        dropCounter = 0;
+    }
+
+    function resetGame() {
+        board.forEach(row => row.fill(0));
+        isGameOver = false;
+        piece = createPiece();
+    }
+
+    // 极简自动游玩 AI（纯挂机演示逻辑：寻找尽可能低且不碰撞的位置）
+    function autoPlayAI() {
+        if (!piece || !isAutoMode) return;
+        
+        // 简单模拟：随机变动一下位置和旋转，让它自然落满屏幕
+        if (Math.random() < 0.1) {
+            // 随机旋转
+            const rotate = (matrix) => matrix[0].map((val, index) => matrix.map(row => row[index]).reverse());
+            const scrambled = rotate(piece.matrix);
+            const oldMatrix = piece.matrix;
+            piece.matrix = scrambled;
+            if (collide(board, piece)) piece.matrix = oldMatrix;
+        }
+        
+        if (Math.random() < 0.2) {
+            // 随机左右平移
+            const dir = Math.random() > 0.5 ? 1 : -1;
+            piece.x += dir;
+            if (collide(board, piece)) piece.x -= dir;
+        }
+    }
+
+    // 方块绘制核心：为其赋予重工业金属材质与 Logo 显现特效
+    function drawBlock(x, y, isStatic) {
+        const px = x * BLOCK_SIZE;
+        const py = y * BLOCK_SIZE;
+
+        if (isStatic && logoLoaded) {
+            // 1. 如果是固定下的方块，作为视窗显现背后的 Logo 照片
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(px + 1, py + 1, BLOCK_SIZE - 2, BLOCK_SIZE - 2);
+            ctx.clip();
+            
+            // 将 Logo 图片等比例拉伸绘制到全画布背景中，仅通过当前方块方格裁剪显现
+            ctx.drawImage(logoImg, 0, 0, canvas.width, canvas.height);
+            
+            // 叠加一层微弱的金属拉丝与凸起阴影滤镜
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+            ctx.fillRect(px, py, BLOCK_SIZE, BLOCK_SIZE);
+            ctx.restore();
+        } else {
+            // 2. 如果是正在下落的临时方块，呈现金属铬/钛灰色拉丝质感
+            let gradient = ctx.createLinearGradient(px, py, px + BLOCK_SIZE, py + BLOCK_SIZE);
+            gradient.addColorStop(0, '#555555');   // 亮银铬高光
+            gradient.addColorStop(0.5, '#222222'); // 钛灰暗部
+            gradient.addColorStop(1, '#111111');   // 深阴影
+            ctx.fillStyle = gradient;
+            ctx.fillRect(px, py, BLOCK_SIZE, BLOCK_SIZE);
+        }
+
+        // 3. 金属立体凸起斜切外框 (Bevel Edge)
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)'; // 上下亮边
+        ctx.lineWidth = 1;
+        ctx.strokeRect(px + 1, py + 1, BLOCK_SIZE - 2, BLOCK_SIZE - 2);
+        
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.6)'; // 右下暗边
+        ctx.beginPath();
+        ctx.moveTo(px + BLOCK_SIZE, py);
+        ctx.lineTo(px + BLOCK_SIZE, py + BLOCK_SIZE);
+        ctx.lineTo(px, py + BLOCK_SIZE);
+        ctx.stroke();
+    }
+
+    // 渲染总流程
+    function draw() {
+        // 背景保持暗黑工业调性
+        ctx.fillStyle = '#050505';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 绘制网格线（非常微弱的工业刻度感）
+        ctx.strokeStyle = '#111111';
+        ctx.lineWidth = 0.5;
+        for (let i = 0; i <= COLS; i++) {
+            ctx.beginPath(); ctx.moveTo(i * BLOCK_SIZE, 0); ctx.lineTo(i * BLOCK_SIZE, canvas.height); ctx.stroke();
+        }
+        for (let j = 0; j <= ROWS; j++) {
+            ctx.beginPath(); ctx.moveTo(0, j * BLOCK_SIZE); ctx.lineTo(canvas.width, j * BLOCK_SIZE); ctx.stroke();
+        }
+
+        // 绘制已固定的方块堆砌层 (在此处显现 Logo)
+        board.forEach((row, y) => {
+            row.forEach((value, x) => {
+                if (value !== 0) {
+                    drawBlock(x, y, true);
+                }
+            });
+        });
+
+        // 绘制正在下落的方块
+        if (piece) {
+            piece.matrix.forEach((row, y) => {
+                row.forEach((value, x) => {
+                    if (value !== 0) {
+                        drawBlock(piece.x + x, piece.y + y, false);
+                    }
+                });
+            });
+        }
+    }
+
+    // 主游戏循环
+    function update(time = 0) {
+        const deltaTime = time - lastTime;
+        lastTime = time;
+
+        if (!isGameOver) {
+            dropCounter += deltaTime;
+            
+            // 挂机模式下使用专属节拍和 AI 运算
+            if (isAutoMode) {
+                dropInterval = 200; // 演示时让它快速堆积下落
+                autoPlayAI();
+            } else {
+                dropInterval = 800; // 玩家游玩时的正常速度
+            }
+
+            if (dropCounter > dropInterval) {
+                playerDrop();
+            }
+        }
+
+        draw();
+        requestAnimationFrame(update);
+    }
+
+    // 交互转换：点击画布任一地方退出自动演示，转为手动操控
+    document.getElementById('gameContainer').addEventListener('click', () => {
+        if (isAutoMode) {
+            isAutoMode = false;
+            statusText.textContent = "Manual Mode";
+            statusText.style.color = "#ffffff";
+            resetGame();
+        }
+    });
+
+    // 手动玩家键盘控制事件
+    window.addEventListener('keydown', event => {
+        if (isAutoMode || isGameOver) return;
+
+        if (event.key === 'ArrowLeft' || event.key === 'a') {
+            piece.x--;
+            if (collide(board, piece)) piece.x++;
+        } else if (event.key === 'ArrowRight' || event.key === 'd') {
+            piece.x++;
+            if (collide(board, piece)) piece.x--;
+        } else if (event.key === 'ArrowDown' || event.key === 's') {
+            playerDrop();
+        } else if (event.key === 'ArrowUp' || event.key === 'w') {
+            // 旋转方块
+            const rotate = (matrix) => matrix[0].map((val, index) => matrix.map(row => row[index]).reverse());
+            const oldMatrix = piece.matrix;
+            piece.matrix = rotate(piece.matrix);
+            if (collide(board, piece)) piece.matrix = oldMatrix;
+        }
+    });
+
+    // 初始化运行
+    piece = createPiece();
+    update();
+</script>
 </body>
 </html>
