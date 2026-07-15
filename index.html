@@ -3,27 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=none">
-    <title>RETRO BATTLE-DAMAGED HANDHELD</title>
+    <title>GOTHIC VAMPIRE VELVET HANDHELD</title>
     <style>
         :root {
-            /* 深蓝色硬质塑料机身变量 */
-            --case-bg: #1a233a; 
-            --case-shadow: #0b0f19;
-            --case-light: #2e3b59;
+            /* 黑色丝绒毛绒外套变量（吸光性极强的深邃暗黑） */
+            --velvet-bg: #121216; 
+            --velvet-shadow: #050507;
+            --velvet-fuzz: #22232a; /* 绒毛边缘反光 */
 
-            /* 复古酒红色实体按键变量 */
-            --btn-bg: #731a27;
-            --btn-shadow: #3b0b12;
-            --btn-light: #a62b3e;
+            /* 哥特铸铁暗黑金属按键变量 */
+            --btn-bg: #1c1c22;
+            --btn-shadow: #0a0a0d;
+            --btn-light: #3a3b45;
+            --blood-red: #990011; /* 吸血鬼凝血红 */
 
-            /* 工业黑边框 */
-            --screen-frame: #131924;
+            /* 屏幕金属外框 */
+            --screen-frame: #181920;
         }
 
         body {
             margin: 0;
             padding: 0;
-            background-color: #070a12; /* 极暗环境，凸显中古机身的轮廓 */
+            background-color: #050508; /* 极度纯黑，衬托丝绒的边缘绒毛感 */
             color: #ffffff;
             font-family: 'Courier New', Courier, monospace;
             display: flex;
@@ -34,71 +35,58 @@
             overflow: hidden;
         }
 
-        /* 游戏机主体：饱经沧桑的深蓝色磨损机身 */
+        /* 游戏机主体：如同穿上了一件黑天鹅绒长毛绒外套 */
         .console-wrapper {
-            background-color: var(--case-bg);
-            padding: 35px 28px 45px 28px;
-            border-radius: 24px;
+            background-color: var(--velvet-bg);
+            padding: 38px 30px 48px 30px;
+            border-radius: 32px;
             
-            /* 核心：通过多重复杂的渐变重叠，模拟塑料褪色、污渍与表面刮痕 */
+            /* 核心：通过极为细腻的复杂径向渐变，模拟毛绒绒外套的凹凸避光面与毛边感 */
             background-image: 
-                /* 磨损痕迹1：右上角塑料摩擦泛白 */
-                radial-gradient(circle at 90% 10%, rgba(255, 255, 255, 0.05) 0%, transparent 40%),
-                /* 磨损痕迹2：边缘老旧氧化斑驳 */
-                radial-gradient(circle at 10% 85%, rgba(0, 0, 0, 0.3) 0%, transparent 50%),
-                /* 刮痕模拟线1 */
-                linear-gradient(135deg, transparent 45%, rgba(255,255,255,0.07) 46%, rgba(255,255,255,0.07) 47%, transparent 48%),
-                /* 刮痕模拟线2 */
-                linear-gradient(210deg, transparent 70%, rgba(0,0,0,0.4) 71%, rgba(0,0,0,0.4) 72%, transparent 73%);
+                /* 顶部毛绒光泽起伏 */
+                radial-gradient(ellipse at 50% 0%, var(--velvet-fuzz) 0%, transparent 70%),
+                /* 左右两侧长毛绒的厚重吸光阴影 */
+                radial-gradient(circle at 0% 50%, rgba(0,0,0,0.5) 0%, transparent 60%),
+                radial-gradient(circle at 100% 50%, rgba(0,0,0,0.5) 0%, transparent 60%),
+                /* 丝绒表面的无规则微弱纹理 */
+                repeating-radial-gradient(rgba(255,255,255,0.01) 0px, transparent 2px, rgba(0,0,0,0.2) 4px);
 
-            /* 极其沉重的工业立体阴影 */
+            /* 丝绒材质独有的超级柔和、大范围扩散的吸光阴影 */
             box-shadow: 
-                20px 30px 60px rgba(0, 0, 0, 0.7),
-                inset 3px 3px 6px var(--case-light),
-                inset -4px -4px 8px var(--case-shadow);
-            border: 1px solid #161e30;
+                0 40px 80px rgba(0, 0, 0, 0.95),
+                inset 0 4px 12px var(--velvet-fuzz),
+                inset 0 -6px 16px var(--velvet-shadow);
+            border: 1px solid #1c1d24;
             display: flex;
             flex-direction: column;
             align-items: center;
             position: relative;
         }
 
-        /* 掌机下方的复古扬声器栅格孔 (注塑磨损感) */
-        .console-wrapper::after {
-            content: "";
-            margin-top: 25px;
-            width: 70px;
-            height: 15px;
-            opacity: 0.6;
-            background: repeating-linear-gradient(90deg, var(--case-shadow), var(--case-shadow) 4px, transparent 4px, transparent 10px);
-            border-bottom: 1px solid var(--case-light);
-        }
-
-        /* 屏幕外框：大黑边卡槽（带岁月划痕） */
+        /* 屏幕古老哥特铁框 */
         .screen-frame {
             background-color: var(--screen-frame);
             padding: 20px 20px 26px 20px;
-            border-radius: 12px;
+            border-radius: 14px;
             box-shadow: 
-                inset 4px 4px 12px rgba(0,0,0,0.9),
-                0 2px 4px rgba(255,255,255,0.04);
-            margin-bottom: 25px;
+                inset 5px 5px 15px rgba(0,0,0,0.95),
+                0 2px 4px rgba(255,255,255,0.02);
+            margin-bottom: 30px;
             position: relative;
-            background-image: radial-gradient(circle at 20% 20%, rgba(255,255,255,0.02) 0%, transparent 60%);
+            border: 1px solid #232530;
         }
 
-        /* 屏幕外部镜面：重现真实掌机的反光与防眩光图层 */
+        /* 屏幕内部容器（暗角烧屏效果） */
         .screen-container {
             position: relative;
             border-radius: 4px;
             overflow: hidden;
-            /* 屏幕内凹阴影 + 老旧液晶的烧屏边缘暗角 (Vignette) */
             box-shadow: 
-                inset 0 0 15px rgba(0,0,0,0.6),
-                0 0 4px rgba(0,0,0,0.5);
+                inset 0 0 20px rgba(0,0,0,0.85),
+                0 0 5px rgba(0,0,0,0.7);
         }
 
-        /* 真实游戏机 LCD 屏幕硬件栅格线覆盖层（核心视觉优化） */
+        /* 复古 LCD 屏幕硬件扫描线 */
         .screen-container::before {
             content: "";
             position: absolute;
@@ -106,10 +94,9 @@
             left: 0;
             width: 100%;
             height: 100%;
-            /* 横向微细扫描线 */
             background: repeating-linear-gradient(
-                rgba(0, 0, 0, 0.13) 0px,
-                rgba(0, 0, 0, 0.13) 1px,
+                rgba(0, 0, 0, 0.15) 0px,
+                rgba(0, 0, 0, 0.15) 1px,
                 transparent 1px,
                 transparent 3px
             );
@@ -117,7 +104,7 @@
             z-index: 5;
         }
 
-        /* 屏幕反光层：假装折射出房间里的一道微弱环境光 */
+        /* 屏幕反光玻璃层 */
         .screen-container::after {
             content: "";
             position: absolute;
@@ -125,43 +112,42 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(115deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.01) 30%, transparent 60%);
+            background: linear-gradient(120deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.005) 40%, transparent 70%);
             pointer-events: none;
             z-index: 6;
         }
 
-        /* 局部换图专用的信号弱化滤镜层 */
+        /* 仅屏幕局部切换的暗黑滤镜 */
         .screen-glitch-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #0b111e; /* 贴合原装LCD断电灰黑色 */
+            background-color: #080a0f; 
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.35s ease-in-out;
             z-index: 10;
         }
         .screen-glitch-overlay.fade-out {
-            opacity: 0.9; 
+            opacity: 0.95; 
         }
 
         canvas {
             display: block;
         }
 
-        /* 物理按键区域 */
+        /* 哥特控制按键区 */
         .controls-wrapper {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 16px;
+            gap: 18px;
             width: 220px;
             justify-items: center;
-            margin-top: 10px;
         }
 
-        /* 经典掌机红按键（带包浆油光感） */
+        /* 铸铁黑金属按键，刻有血族红标识 */
         .key-btn {
             width: 62px;
             height: 62px;
@@ -173,27 +159,30 @@
             justify-content: center;
             align-items: center;
             font-size: 16px;
-            color: rgba(255, 255, 255, 0.55);
-            /* 多重阴影：边缘高光剥落露白 + 深沉物理基座阴影 */
+            color: var(--blood-red);
+            text-shadow: 0 0 4px rgba(153, 0, 17, 0.4);
+            /* 坚硬的冷金属反光与深邃咬合阴影 */
             box-shadow: 
-                4px 6px 12px rgba(0, 0, 0, 0.6),
-                inset 1px 2px 2px var(--btn-light),
-                inset -3px -3px 5px var(--btn-shadow);
-            transition: all 0.04s ease;
+                4px 8px 16px rgba(0, 0, 0, 0.85),
+                inset 1px 2px 3px var(--btn-light),
+                inset -3px -3px 6px var(--btn-shadow);
+            transition: all 0.05s ease;
             -webkit-tap-highlight-color: transparent;
+            border: 1px solid #15151a;
         }
 
-        /* 按键真实踩踏动作 */
+        /* 铁质按键按下效果 */
         .key-btn:active, .key-btn.pseudo-active {
             box-shadow: 
-                1px 1px 2px rgba(0, 0, 0, 0.4),
-                inset 4px 4px 7px var(--btn-shadow),
+                1px 1px 3px rgba(0, 0, 0, 0.6),
+                inset 4px 5px 8px var(--btn-shadow),
                 inset -1px -1px 2px var(--btn-light);
-            color: rgba(255, 255, 255, 0.9);
-            transform: translateY(2.5px) scale(0.96);
+            color: #ff1a35; /* 点击时血色变亮闪烁 */
+            text-shadow: 0 0 8px #ff1a35;
+            transform: translateY(2px);
         }
 
-        /* 方向键白字图标 */
+        /* 哥特箭头的金属符号 */
         .icon-up::before { content: '▲'; }
         .icon-down::before { content: '▼'; }
         .icon-left::before { content: '◄'; }
@@ -208,7 +197,7 @@
 </head>
 <body>
 
-    <!-- 斑驳工业掌机 -->
+    <!-- 黑色丝绒哥特掌机 -->
     <div class="console-wrapper">
         <div class="screen-frame">
             <div class="screen-container">
@@ -230,7 +219,6 @@
     const ctx = canvas.getContext('2d');
     const screenOverlay = document.getElementById('screenOverlay');
 
-    // 📐 6×6 艺术矩阵
     const COLS = 6;
     const ROWS = 6;
     const BLOCK_SIZE = Math.min(56, (window.innerHeight * 0.43) / ROWS); 
@@ -238,7 +226,6 @@
     canvas.width = COLS * BLOCK_SIZE;
     canvas.height = ROWS * BLOCK_SIZE;
 
-    // 🖼️ 多图循环列表
     const photoList = ['logo1.png', 'logo2.png', 'logo3.png'];
     let currentPhotoIndex = 0;
     
@@ -260,7 +247,7 @@
 
     function nextPhoto() {
         currentPhotoIndex = (currentPhotoIndex + 1) % photoList.length;
-        screenOverlay.classList.add('fade-out'); // 仅屏幕内部淡出变暗
+        screenOverlay.classList.add('fade-out'); 
         
         setTimeout(() => {
             loadCurrentPhoto();
@@ -270,7 +257,6 @@
 
     loadCurrentPhoto();
 
-    // 游戏核心数据
     const board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
     let piece = null;
     let isAutoMode = true; 
@@ -376,9 +362,8 @@
         dropInterval = 50; 
     }
 
-    // 🎨 模拟硬件 LCD 像素物理方块绘制
+    // 🎨 绘制吸血鬼哥特风格的点阵方块
     function drawBlock(x, y, isStatic) {
-        // 为了模拟液晶屏幕方块之间的缝隙，收缩 1.5 像素的绘制范围
         const gap = 1.5;
         const px = x * BLOCK_SIZE + gap;
         const py = y * BLOCK_SIZE + gap;
@@ -409,38 +394,38 @@
 
                 ctx.drawImage(logoImg, drawX, drawY, drawWidth, drawHeight);
                 
-                // 工业灰绿滤镜：给予底层 Logo 极强的任天堂式旧液晶发黄发绿感
-                ctx.fillStyle = 'rgba(148, 163, 184, 0.25)';
+                // 幽冥古堡灰绿偏光滤镜
+                ctx.fillStyle = 'rgba(100, 116, 139, 0.3)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             } else {
-                ctx.fillStyle = '#8ba1b5';
+                ctx.fillStyle = '#6b7280';
                 ctx.fillRect(px, py, size, size);
             }
             ctx.restore();
 
-            // 模拟液晶基底凹陷质感（内黑外轻白线）
-            ctx.strokeStyle = 'rgba(0, 0, 0, 0.18)';
+            // 液晶格栅边缘
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.25)';
             ctx.lineWidth = 1;
             ctx.strokeRect(px, py, size, size);
 
         } else {
-            // 下落方块：采用强烈的复古高亮电子白，四周有一层黑色的液晶像素封装边缘
-            ctx.fillStyle = '#ffffff'; 
+            // 下落方块：幽灵般的发光白，带有黑金属质感轮廓
+            ctx.fillStyle = '#f8fafc'; 
             ctx.fillRect(px, py, size, size);
             
-            ctx.strokeStyle = '#0f172a'; 
+            ctx.strokeStyle = '#090a0f'; 
             ctx.lineWidth = 2; 
             ctx.strokeRect(px + 0.5, py + 0.5, size - 1, size - 1);
         }
     }
 
     function draw() {
-        // 复古 LCD 底色：带有微量灰黄的工业冷色调液晶底色
-        ctx.fillStyle = '#a2b4c7'; 
+        // 幽冥冷灰底色
+        ctx.fillStyle = '#8da2b5'; 
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // 电子像素点阵微弱分割网格
-        ctx.strokeStyle = '#90a4b7';
+        // 极淡的点阵划分线
+        ctx.strokeStyle = '#7e93a8';
         ctx.lineWidth = 0.5;
         for (let i = 0; i <= COLS; i++) {
             ctx.beginPath(); ctx.moveTo(i * BLOCK_SIZE, 0); ctx.lineTo(i * BLOCK_SIZE, canvas.height); ctx.stroke();
