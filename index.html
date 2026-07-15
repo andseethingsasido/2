@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CHROME TETRIS | ANDSEETHINGSASIDO</title>
+    <title>WHITE MINIMALIST TETRIS | ANDSEETHINGSASIDO</title>
     <style>
         body {
             margin: 0;
@@ -20,26 +20,25 @@
             background-image: radial-gradient(circle at center, #111111 0%, #030303 100%);
         }
 
-        /* 游戏主容器：硬朗重工业外框 */
+        /* 游戏主容器：极简黑白线条 */
         .game-container {
             position: relative;
-            box-shadow: 0 0 60px rgba(255, 255, 255, 0.03), inset 0 0 20px rgba(0,0,0,0.8);
-            border: 4px solid #1f1f1f;
+            box-shadow: 0 0 50px rgba(255, 255, 255, 0.02);
+            border: 2px solid #222222;
             background-color: #000000;
-            border-radius: 2px;
         }
 
         canvas {
             display: block;
         }
 
-        /* 顶层工业状态文字 */
+        /* 极简工业状态文字 */
         .status-overlay {
             position: absolute;
             top: 15px;
             left: 15px;
             font-size: 10px;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
             color: #444444;
             text-transform: uppercase;
             pointer-events: none;
@@ -50,7 +49,7 @@
 <body>
 
     <div class="game-container" id="gameContainer">
-        <div class="status-overlay" id="statusText">SYSTEM // AUTOMATIC_STACKING</div>
+        <div class="status-overlay" id="statusText">SYSTEM // GRID_8X8_AUTO</div>
         <canvas id="tetris"></canvas>
     </div>
 
@@ -59,10 +58,10 @@
     const ctx = canvas.getContext('2d');
     const statusText = document.getElementById('statusText');
 
-    // 🚨 完美正方形重构：10行×10列的绝对正方形舞台
-    const COLS = 10;
-    const ROWS = 10;
-    const BLOCK_SIZE = 45; // 放大单块尺寸，让浮雕与镭射细节更清晰显现
+    // 📐 严格重构为 8×8 的完美正方形阵列
+    const COLS = 8;
+    const ROWS = 8;
+    const BLOCK_SIZE = 55; // 适配 8x8 布局，放大方块让画面更饱满
 
     canvas.width = COLS * BLOCK_SIZE;
     canvas.height = ROWS * BLOCK_SIZE;
@@ -72,7 +71,6 @@
     logoImg.src = 'logo.png'; 
     let logoLoaded = false;
     logoImg.onload = () => { logoLoaded = true; };
-    logoImg.onerror = () => { logoLoaded = false; };
 
     // 网格数据
     const board = Array.from({ length: ROWS }, () => Array(COLS).fill(0));
@@ -80,13 +78,13 @@
     let piece = null;
     let isAutoMode = true; 
     let dropCounter = 0;
-    let dropInterval = 100; 
+    let dropInterval = 120; 
     let lastTime = 0;
     let isFinished = false;
-    let laserHue = 0; // 用于驱动动态镭射彩虹反射的时间变量
 
-    // 自动模式下强制生成最规整的几何体
+    // 确保自动铺满的完美几何体包
     function createPiece() {
+        // 自动模式下只生成最规整的 2x2 方块 和 1x4 长条，确保完美闭合
         const shape = Math.random() > 0.5 ? [[1, 1], [1, 1]] : [[1, 1, 1, 1]];
         return {
             matrix: shape,
@@ -126,14 +124,14 @@
 
             if (isAutoMode && checkFilled()) {
                 isFinished = true;
-                statusText.textContent = "EMBOSSED LOGO LOCKED.";
-                statusText.style.color = "#888888";
+                statusText.textContent = "MATRIX LOCKED.";
+                statusText.style.color = "#666666";
                 return;
             }
             piece = createPiece();
             if (collide(board, piece)) {
                 isFinished = true;
-                statusText.textContent = "OVERLOAD. CLICK TO RESET";
+                statusText.textContent = "COMPLETED // OVERFLOW";
             }
         }
         dropCounter = 0;
@@ -159,10 +157,12 @@
         return true;
     }
 
-    // 砌砖AI：从下至上完美填满正方形
+    // 8x8 高精准自动砌砖算法
     function autoPlayAI() {
         if (!piece || !isAutoMode || isFinished) return;
         let targetRow = -1, targetCol = -1, found = false;
+        
+        // 自底向上搜索空缺
         for (let r = ROWS - 1; r >= 0; r--) {
             for (let c = 0; c < COLS; c++) {
                 if (board[r][c] === 0) {
@@ -173,136 +173,86 @@
         }
         if (!found) return;
 
+        // 水平对齐空缺位置
         if (piece.x < targetCol) {
             piece.x++; if (collide(board, piece)) piece.x--;
         } else if (piece.x > targetCol) {
             piece.x--; if (collide(board, piece)) piece.x++;
         }
-        dropInterval = (piece.x === targetCol) ? 30 : 100;
+        
+        // 锁定时加速下落，对齐时保持稳定节奏
+        dropInterval = (piece.x === targetCol) ? 30 : 120;
     }
 
-    // 🎨 高级工业级材质渲染引擎
+    // 🎨 纯白极简方块渲染
     function drawBlock(x, y, isStatic) {
         const px = x * BLOCK_SIZE;
         const py = y * BLOCK_SIZE;
 
         if (isStatic) {
-            // ==========================================
-            // 【固定的方块】：生锈金属衬底 + 3D凹凸浮雕烙印 Logo
-            // ==========================================
+            // 【固定后的方块】：纯白色，背后衬托等比例不失真的 Logo
             ctx.save();
             
-            // 建立方块物理范围裁剪区
+            // 建立方块物理区裁剪
             ctx.beginPath();
-            ctx.rect(px + 1, py + 1, BLOCK_SIZE - 2, BLOCK_SIZE - 2);
+            ctx.rect(px, py, BLOCK_SIZE, BLOCK_SIZE);
             ctx.clip();
 
             if (logoLoaded) {
-                // 1. 底层：绘制略微暗淡、带铁锈氧化的金属基底
-                ctx.drawImage(logoImg, 0, 0, canvas.width, canvas.height);
-                
-                // 叠加一层斑驳的铁锈、氧化暗斑滤镜
-                let rustGrad = ctx.createRadialGradient(px+BLOCK_SIZE/2, py+BLOCK_SIZE/2, 2, px+BLOCK_SIZE/2, py+BLOCK_SIZE/2, BLOCK_SIZE);
-                rustGrad.addColorStop(0, 'rgba(35, 25, 20, 0.2)'); // 铁锈微红
-                rustGrad.addColorStop(1, 'rgba(0, 0, 0, 0.45)');   // 边缘重度氧化
-                ctx.fillStyle = rustGrad;
-                ctx.fillRect(px, py, BLOCK_SIZE, BLOCK_SIZE);
+                // 🔒 【等比例防变形算法】 (Aspect Ratio Protection)
+                const canvasAspect = canvas.width / canvas.height;
+                const imgAspect = logoImg.width / logoImg.height;
+                let drawWidth, drawHeight, drawX, drawY;
 
-                // 2. 核心：双重滤镜叠加实现“深嵌入式”与“隆起浮雕”质感
-                ctx.restore(); // 暂时跳出硬裁剪，进行全画幅浮雕阴影计算
-                ctx.save();
-                ctx.beginPath();
-                ctx.rect(px + 1, py + 1, BLOCK_SIZE - 2, BLOCK_SIZE - 2);
-                ctx.clip();
+                if (imgAspect > canvasAspect) {
+                    // 图片过宽，以高度为基准缩放，水平居中裁剪
+                    drawHeight = canvas.height;
+                    drawWidth = canvas.height * imgAspect;
+                    drawX = (canvas.width - drawWidth) / 2;
+                    drawY = 0;
+                } else {
+                    // 图片过高，以宽度为基准缩放，垂直居中裁剪
+                    drawWidth = canvas.width;
+                    drawHeight = canvas.width / imgAspect;
+                    drawX = 0;
+                    drawY = (canvas.height - drawHeight) / 2;
+                }
 
-                // 亮部突起斜切面 (135度光照带来的白色高光边缘)
-                ctx.shadowColor = 'rgba(255, 255, 255, 0.4)';
-                ctx.shadowBlur = 2;
-                ctx.shadowOffsetX = -1.5;
-                ctx.shadowOffsetY = -1.5;
-                
-                // 暗部沉降凹陷面 (右下角的深黑色烙印投影)
-                ctx.shadowColor = 'rgba(0, 0, 0, 0.9)';
-                ctx.shadowOffsetX = 2;
-                ctx.shadowOffsetY = 2;
-                ctx.shadowBlur = 3;
+                ctx.drawImage(logoImg, drawX, drawY, drawWidth, drawHeight);
 
-                // 重新绘制一次，使阴影只在边缘锐利切割，产生钢铁烙印的激凸立体感
-                ctx.globalCompositeOperation = 'source-atop';
-                ctx.drawImage(logoImg, 0, 0, canvas.width, canvas.height);
+                // 叠加一层高级的白色滤镜，使底层照片融合成“白底极简纹理”
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
             } else {
-                // 没图时的生锈金属替代色
-                ctx.fillStyle = '#1c1a17';
+                // 若没有 Logo 则显示最纯粹的现代主义冷白
+                ctx.fillStyle = '#ffffff';
                 ctx.fillRect(px, py, BLOCK_SIZE, BLOCK_SIZE);
             }
             ctx.restore();
 
-            // 工业拼接铆缝
-            ctx.strokeStyle = 'rgba(0, 0, 0, 0.6)';
-            ctx.lineWidth = 1;
+            // 极细的暗黑色方块拼接缝，让白色方块的模块化矩阵感拉满
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 1.5;
             ctx.strokeRect(px, py, BLOCK_SIZE, BLOCK_SIZE);
-            
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
-            ctx.strokeRect(px + 1, py + 1, BLOCK_SIZE - 2, BLOCK_SIZE - 2);
 
         } else {
-            // ==========================================
-            // 【下落中的方块】：极致液态亮银 + 动态镭射彩虹反射
-            // ==========================================
-            ctx.save();
-            
-            // 1. 创建亮银金属镜面质感的底色渐变
-            let chromeGrad = ctx.createLinearGradient(px, py, px + BLOCK_SIZE, py + BLOCK_SIZE);
-            chromeGrad.addColorStop(0, '#ffffff'); // 耀眼白光
-            chromeGrad.addColorStop(0.2, '#d0d5dd'); // 铬银冷色
-            chromeGrad.addColorStop(0.4, '#777e8a'); // 深钛灰中段
-            chromeGrad.addColorStop(0.5, '#eceff3'); // 次级镜面光
-            chromeGrad.addColorStop(0.8, '#3a3f47'); // 极深暗部
-            chromeGrad.addColorStop(1, '#686f7c');
-            
-            ctx.fillStyle = chromeGrad;
+            // 【下落中的方块】：绝对的纯白色
+            ctx.fillStyle = '#ffffff';
             ctx.fillRect(px, py, BLOCK_SIZE, BLOCK_SIZE);
-
-            // 2. 镭射效果优化 (Holographic Laser Overlay)
-            // 叠加一层半透明的动态彩虹折射光，色彩和位置会根据时间（laserHue）平滑流动
-            let laserGrad = ctx.createLinearGradient(px - BLOCK_SIZE, py, px + BLOCK_SIZE * 2, py + BLOCK_SIZE);
-            let h = laserHue;
-            laserGrad.addColorStop(0, `hsla(${h}, 85%, 65%, 0.0)`);
-            laserGrad.addColorStop(0.3, `hsla(${(h+60)%360}, 90%, 65%, 0.25)`); // 幻彩霓虹绿/青
-            laserGrad.addColorStop(0.6, `hsla(${(h+180)%360}, 90%, 60%, 0.3)`); // 幻彩紫/红
-            laserGrad.addColorStop(1, `hsla(${(h+300)%360}, 85%, 65%, 0.0)`);
             
-            ctx.fillStyle = laserGrad;
-            ctx.globalCompositeOperation = 'color-burn'; // 烧灼混合模式，让镭射颜色生动渗入银色中
-            ctx.fillRect(px, py, BLOCK_SIZE, BLOCK_SIZE);
-            ctx.globalCompositeOperation = 'source-over';
-
-            // 3. 镀铬镜面极为锐利的反射亮边 (Chiseled Edge)
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)'; // 极亮顶边
+            // 拼接线
+            ctx.strokeStyle = '#000000';
             ctx.lineWidth = 1.5;
-            ctx.beginPath();
-            ctx.moveTo(px, py + BLOCK_SIZE);
-            ctx.lineTo(px, py);
-            ctx.lineTo(px + BLOCK_SIZE, py);
-            ctx.stroke();
-
-            ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)'; // 暗沉底边
-            ctx.beginPath();
-            ctx.moveTo(px + BLOCK_SIZE, py);
-            ctx.lineTo(px + BLOCK_SIZE, py + BLOCK_SIZE);
-            ctx.lineTo(px, py + BLOCK_SIZE);
-            ctx.stroke();
-            
-            ctx.restore();
+            ctx.strokeRect(px, py, BLOCK_SIZE, BLOCK_SIZE);
         }
     }
 
     function draw() {
-        // 深邃哑光炭黑背景，衬托上层金属
+        // 纯哑光黑背景
         ctx.fillStyle = '#0a0a0b';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // 微弱的机械网格刻度线
+        // 极淡的暗底参考网格
         ctx.strokeStyle = '#141416';
         ctx.lineWidth = 0.5;
         for (let i = 0; i <= COLS; i++) {
@@ -312,14 +262,14 @@
             ctx.beginPath(); ctx.moveTo(0, j * BLOCK_SIZE); ctx.lineTo(canvas.width, j * BLOCK_SIZE); ctx.stroke();
         }
 
-        // 渲染已固定阵列
+        // 绘制固定的白色阵列
         board.forEach((row, y) => {
             row.forEach((value, x) => {
                 if (value !== 0) drawBlock(x, y, true);
             });
         });
 
-        // 渲染活动镭射块
+        // 绘制活动的白色动态块
         if (piece && !isFinished) {
             piece.matrix.forEach((row, y) => {
                 row.forEach((value, x) => {
@@ -332,9 +282,6 @@
     function update(time = 0) {
         const deltaTime = time - lastTime;
         lastTime = time;
-
-        // 驱动镭射效果色彩位移
-        laserHue = (laserHue + 0.8) % 360;
 
         if (!isFinished) {
             dropCounter += deltaTime;
@@ -350,8 +297,8 @@
         board.forEach(row => row.fill(0));
         isAutoMode = false;
         isFinished = false;
-        dropInterval = 800; 
-        statusText.textContent = "MANUAL CONTROLS // LIVE";
+        dropInterval = 800; // 玩家操控时恢复舒适的慢速
+        statusText.textContent = "MANUAL MODE // ACTIVE";
         statusText.style.color = "#ffffff";
         piece = createPiece();
     }
