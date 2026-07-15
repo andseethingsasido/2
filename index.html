@@ -3,28 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-select=none">
-    <title>GOTHIC VAMPIRE VELVET HANDHELD</title>
+    <title>REAL VELVET GOTHIC HANDHELD</title>
     <style>
         :root {
-            /* 黑色丝绒毛绒外套变量（吸光性极强的深邃暗黑） */
-            --velvet-bg: #121216; 
-            --velvet-shadow: #050507;
-            --velvet-fuzz: #22232a; /* 绒毛边缘反光 */
+            /* 黑色丝绒：极致吸光的午夜黑 */
+            --velvet-core: #0b0b0d; 
+            --velvet-fuzz-light: #31333d; /* 绒毛边缘在光线下的折射泛白 */
+            --velvet-deep-shadow: #020203;
 
-            /* 哥特铸铁暗黑金属按键变量 */
-            --btn-bg: #1c1c22;
-            --btn-shadow: #0a0a0d;
-            --btn-light: #3a3b45;
-            --blood-red: #990011; /* 吸血鬼凝血红 */
-
-            /* 屏幕金属外框 */
-            --screen-frame: #181920;
+            /* 哥特黑金属与吸血鬼红 */
+            --gothic-metal: #18191f;
+            --metal-shine: #434654;
+            --blood-crimson: #a60014; 
+            --blood-glow: #ff1a35;
         }
 
         body {
             margin: 0;
             padding: 0;
-            background-color: #050508; /* 极度纯黑，衬托丝绒的边缘绒毛感 */
+            background-color: #030304; 
             color: #ffffff;
             font-family: 'Courier New', Courier, monospace;
             display: flex;
@@ -35,58 +32,79 @@
             overflow: hidden;
         }
 
-        /* 游戏机主体：如同穿上了一件黑天鹅绒长毛绒外套 */
+        /* 游戏机主体：长毛绒外套包裹层 */
         .console-wrapper {
-            background-color: var(--velvet-bg);
-            padding: 38px 30px 48px 30px;
-            border-radius: 32px;
-            
-            /* 核心：通过极为细腻的复杂径向渐变，模拟毛绒绒外套的凹凸避光面与毛边感 */
-            background-image: 
-                /* 顶部毛绒光泽起伏 */
-                radial-gradient(ellipse at 50% 0%, var(--velvet-fuzz) 0%, transparent 70%),
-                /* 左右两侧长毛绒的厚重吸光阴影 */
-                radial-gradient(circle at 0% 50%, rgba(0,0,0,0.5) 0%, transparent 60%),
-                radial-gradient(circle at 100% 50%, rgba(0,0,0,0.5) 0%, transparent 60%),
-                /* 丝绒表面的无规则微弱纹理 */
-                repeating-radial-gradient(rgba(255,255,255,0.01) 0px, transparent 2px, rgba(0,0,0,0.2) 4px);
-
-            /* 丝绒材质独有的超级柔和、大范围扩散的吸光阴影 */
-            box-shadow: 
-                0 40px 80px rgba(0, 0, 0, 0.95),
-                inset 0 4px 12px var(--velvet-fuzz),
-                inset 0 -6px 16px var(--velvet-shadow);
-            border: 1px solid #1c1d24;
+            background-color: var(--velvet-core);
+            padding: 38px 32px 48px 32px;
+            border-radius: 36px;
+            position: relative;
             display: flex;
             flex-direction: column;
             align-items: center;
-            position: relative;
+
+            /* 丝绒材质的灵魂：正面极端吸光，但边缘由于长毛绒的折射，会有一圈毛茸茸的泛白光晕 */
+            box-shadow: 
+                0 35px 70px rgba(0, 0, 0, 0.95),
+                inset 0 0 24px rgba(255, 255, 255, 0.06), /* 表面微弱的绒毛反光 */
+                inset 0 6px 14px var(--velvet-fuzz-light), /* 顶部绒毛受光面 */
+                inset 0 -10px 20px var(--velvet-deep-shadow); 
+            
+            border: 1px solid #1a1a22;
+            overflow: hidden; /* 锁住内部的毛绒纤维层 */
         }
 
-        /* 屏幕古老哥特铁框 */
+        /* 🔬 核心升级：利用 SVG 噪点生成真实的“长毛绒/丝绒织物”微观物理纤维纹理 */
+        .velvet-fabric-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            /* 混合模式选择 overlay，让噪点与下方的吸光黑完美融合，产生粗粝又柔软的毛绒质感 */
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+            opacity: 0.18;
+            mix-blend-mode: overlay;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* 丝绒表面因为长毛绒修剪产生的凹凸避光吸光带 */
+        .velvet-nap-shading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 20%, transparent 20%, rgba(0,0,0,0.6) 70%);
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* 哥特铸铁屏幕框 */
         .screen-frame {
-            background-color: var(--screen-frame);
-            padding: 20px 20px 26px 20px;
-            border-radius: 14px;
+            background-color: #0f1014;
+            padding: 22px 22px 28px 22px;
+            border-radius: 16px;
             box-shadow: 
-                inset 5px 5px 15px rgba(0,0,0,0.95),
-                0 2px 4px rgba(255,255,255,0.02);
+                inset 4px 6px 15px rgba(0,0,0,0.95),
+                0 2px 8px rgba(255, 255, 255, 0.02);
             margin-bottom: 30px;
             position: relative;
-            border: 1px solid #232530;
+            border: 2px solid #20222b;
+            z-index: 3; /* 确保硬件浮在丝绒外衣上方 */
         }
 
-        /* 屏幕内部容器（暗角烧屏效果） */
+        /* 真实的中古发光液晶镜面结构 */
         .screen-container {
             position: relative;
             border-radius: 4px;
             overflow: hidden;
             box-shadow: 
-                inset 0 0 20px rgba(0,0,0,0.85),
-                0 0 5px rgba(0,0,0,0.7);
+                inset 0 0 25px rgba(0,0,0,0.9),
+                0 0 6px rgba(0,0,0,0.8);
         }
 
-        /* 复古 LCD 屏幕硬件扫描线 */
+        /* 物理 LCD 屏幕硬件横向扫描线（真实点阵像素感） */
         .screen-container::before {
             content: "";
             position: absolute;
@@ -95,8 +113,8 @@
             width: 100%;
             height: 100%;
             background: repeating-linear-gradient(
-                rgba(0, 0, 0, 0.15) 0px,
-                rgba(0, 0, 0, 0.15) 1px,
+                rgba(0, 0, 0, 0.16) 0px,
+                rgba(0, 0, 0, 0.16) 1px,
                 transparent 1px,
                 transparent 3px
             );
@@ -104,7 +122,7 @@
             z-index: 5;
         }
 
-        /* 屏幕反光玻璃层 */
+        /* 玻璃折射光斑 */
         .screen-container::after {
             content: "";
             position: absolute;
@@ -112,19 +130,19 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(120deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.005) 40%, transparent 70%);
+            background: linear-gradient(125deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.005) 35%, transparent 65%);
             pointer-events: none;
             z-index: 6;
         }
 
-        /* 仅屏幕局部切换的暗黑滤镜 */
+        /* 仅允许屏幕内部切换的暗色图层 */
         .screen-glitch-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: #080a0f; 
+            background-color: #05070a; 
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.35s ease-in-out;
@@ -138,20 +156,21 @@
             display: block;
         }
 
-        /* 哥特控制按键区 */
+        /* 按键控制区 */
         .controls-wrapper {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 18px;
             width: 220px;
             justify-items: center;
+            z-index: 3;
         }
 
-        /* 铸铁黑金属按键，刻有血族红标识 */
+        /* 哥特黑曜石镜面金属按键 */
         .key-btn {
-            width: 62px;
-            height: 62px;
-            background-color: var(--btn-bg);
+            width: 64px;
+            height: 64px;
+            background-color: var(--gothic-metal);
             border-radius: 50%;
             border: none;
             cursor: pointer;
@@ -159,30 +178,31 @@
             justify-content: center;
             align-items: center;
             font-size: 16px;
-            color: var(--blood-red);
-            text-shadow: 0 0 4px rgba(153, 0, 17, 0.4);
-            /* 坚硬的冷金属反光与深邃咬合阴影 */
+            color: var(--blood-crimson);
+            text-shadow: 0 0 6px rgba(166, 0, 20, 0.6);
+            
+            /* 金属按键的高锋利度反光与深不可测的物理下陷阴影 */
             box-shadow: 
-                4px 8px 16px rgba(0, 0, 0, 0.85),
-                inset 1px 2px 3px var(--btn-light),
-                inset -3px -3px 6px var(--btn-shadow);
+                5px 10px 20px rgba(0, 0, 0, 0.9),
+                inset 1.5px 2px 3px var(--metal-shine),
+                inset -3px -3px 6px rgba(0, 0, 0, 0.8);
+            
             transition: all 0.05s ease;
             -webkit-tap-highlight-color: transparent;
-            border: 1px solid #15151a;
+            border: 1px solid #0d0e12;
         }
 
-        /* 铁质按键按下效果 */
+        /* 铁质按键点击：血族刻印剧烈发光 */
         .key-btn:active, .key-btn.pseudo-active {
             box-shadow: 
-                1px 1px 3px rgba(0, 0, 0, 0.6),
-                inset 4px 5px 8px var(--btn-shadow),
-                inset -1px -1px 2px var(--btn-light);
-            color: #ff1a35; /* 点击时血色变亮闪烁 */
-            text-shadow: 0 0 8px #ff1a35;
-            transform: translateY(2px);
+                1px 1px 4px rgba(0, 0, 0, 0.7),
+                inset 4px 5px 10px rgba(0,0,0,0.9),
+                inset -1px -1px 2px var(--metal-shine);
+            color: var(--blood-glow); 
+            text-shadow: 0 0 12px var(--blood-glow);
+            transform: translateY(2.5px);
         }
 
-        /* 哥特箭头的金属符号 */
         .icon-up::before { content: '▲'; }
         .icon-down::before { content: '▼'; }
         .icon-left::before { content: '◄'; }
@@ -197,8 +217,13 @@
 </head>
 <body>
 
-    <!-- 黑色丝绒哥特掌机 -->
+    <!-- 哥特吸血鬼黑丝绒掌机 -->
     <div class="console-wrapper">
+        <!-- 材质生成层 -->
+        <div class="velvet-fabric-layer"></div>
+        <div class="velvet-nap-shading"></div>
+
+        <!-- 屏幕铁框 -->
         <div class="screen-frame">
             <div class="screen-container">
                 <div class="screen-glitch-overlay" id="screenOverlay"></div>
@@ -206,6 +231,7 @@
             </div>
         </div>
 
+        <!-- 金属按键 -->
         <div class="controls-wrapper">
             <button class="key-btn key-up" id="btnUp" data-key="up"><span class="icon-up"></span></button>
             <button class="key-btn key-left" id="btnLeft" data-key="left"><span class="icon-left"></span></button>
@@ -362,7 +388,7 @@
         dropInterval = 50; 
     }
 
-    // 🎨 绘制吸血鬼哥特风格的点阵方块
+    // 🎨 绘制具有古老 LCD 点阵缝隙与幽冥滤镜的方块
     function drawBlock(x, y, isStatic) {
         const gap = 1.5;
         const px = x * BLOCK_SIZE + gap;
@@ -394,38 +420,37 @@
 
                 ctx.drawImage(logoImg, drawX, drawY, drawWidth, drawHeight);
                 
-                // 幽冥古堡灰绿偏光滤镜
-                ctx.fillStyle = 'rgba(100, 116, 139, 0.3)';
+                // 古堡幽冥灰绿色液晶滤镜层
+                ctx.fillStyle = 'rgba(90, 105, 120, 0.35)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
             } else {
-                ctx.fillStyle = '#6b7280';
+                ctx.fillStyle = '#556373';
                 ctx.fillRect(px, py, size, size);
             }
             ctx.restore();
 
-            // 液晶格栅边缘
-            ctx.strokeStyle = 'rgba(0, 0, 0, 0.25)';
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
             ctx.lineWidth = 1;
             ctx.strokeRect(px, py, size, size);
 
         } else {
-            // 下落方块：幽灵般的发光白，带有黑金属质感轮廓
-            ctx.fillStyle = '#f8fafc'; 
+            // 下落方块：幽灵般的发光白
+            ctx.fillStyle = '#f1f5f9'; 
             ctx.fillRect(px, py, size, size);
             
-            ctx.strokeStyle = '#090a0f'; 
+            ctx.strokeStyle = '#020203'; 
             ctx.lineWidth = 2; 
             ctx.strokeRect(px + 0.5, py + 0.5, size - 1, size - 1);
         }
     }
 
     function draw() {
-        // 幽冥冷灰底色
-        ctx.fillStyle = '#8da2b5'; 
+        // 暗黑古堡液晶冷灰蓝底色
+        ctx.fillStyle = '#788d9e'; 
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // 极淡的点阵划分线
-        ctx.strokeStyle = '#7e93a8';
+        // 像素点阵格栅
+        ctx.strokeStyle = '#697c8c';
         ctx.lineWidth = 0.5;
         for (let i = 0; i <= COLS; i++) {
             ctx.beginPath(); ctx.moveTo(i * BLOCK_SIZE, 0); ctx.lineTo(i * BLOCK_SIZE, canvas.height); ctx.stroke();
