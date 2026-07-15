@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COLLECTION | ASIDI</title>
+    <style>
+        /* 1. 奢侈品极简黑白风格 */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+            color: #111111;
+            font-family: "Didot", "Bodoni MT", "Cinzel", "Times New Roman", serif;
+            letter-spacing: 2px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 2. 优雅的顶部导航栏 */
+        header {
+            padding: 30px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f2f2f2;
+        }
+
+        .brand-logo {
+            font-size: 24px;
+            font-weight: bold;
+            text-transform: uppercase;
+            text-decoration: none;
+            color: #111111;
+        }
+
+        .nav-links a {
+            margin-left: 30px;
+            text-decoration: none;
+            color: #666666;
+            font-size: 13px;
+            text-transform: uppercase;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover {
+            color: #111111;
+        }
+
+        /* 3. 商品大货架容器 */
+        .container {
+            max-width: 1200px;
+            margin: 60px auto;
+            padding: 0 20px;
+        }
+
+        .collection-title {
+            text-align: center;
+            font-size: 26px;
+            margin-bottom: 60px;
+            text-transform: uppercase;
+            font-weight: 300;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 50px;
+        }
+
+        .product-card {
+            text-align: center;
+        }
+
+        /* 4. 核心：大牌感丝滑多图横向滑动区 */
+        .product-image-slider {
+            background-color: #fcfcfc;
+            aspect-ratio: 3 / 4; /* 奢侈品画册经典的 3:4 比例 */
+            display: flex;
+            overflow-x: auto; /* 激活横向滚动 */
+            scroll-snap-type: x mandatory; /* 手机滑动自动磁吸对齐 */
+            scroll-behavior: smooth;
+            margin-bottom: 20px;
+            border-radius: 2px;
+        }
+
+        /* 隐藏原生滚动条，保持绝对干净的视觉感 */
+        .product-image-slider::-webkit-scrollbar {
+            display: none;
+        }
+        .product-image-slider {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* 确保滑动的每张细节图都完美铺满 */
+        .product-image-slider img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            flex-shrink: 0;
+            scroll-snap-align: start;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        /* 5. 文字与信息排版 */
+        .product-name {
+            font-size: 14px;
+            margin: 15px 0 6px 0;
+            text-transform: uppercase;
+            font-weight: 400;
+        }
+
+        .product-price {
+            font-size: 13px;
+            color: #888888;
+            margin-bottom: 20px;
+        }
+
+        /* 6. 高级定制购买按钮 */
+        .buy-btn {
+            display: inline-block;
+            background-color: #111111;
+            color: #ffffff;
+            padding: 12px 35px;
+            font-size: 11px;
+            text-transform: uppercase;
+            text-decoration: none;
+            border: 1px solid #111111;
+            transition: all 0.3s ease;
+        }
+        .buy-btn:hover {
+            background-color: #ffffff;
+            color: #111111;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 顶部导航 -->
+    <header>
+        <a href="#" class="brand-logo">ASIDI</a>
+        <div class="nav-links">
+            <a href="#">Shop</a>
+            <a href="#">Story</a>
+            <a href="#">Contact</a>
+        </div>
+    </header>
+
+    <!-- 动态商品区 -->
+    <div class="container">
+        <h2 class="collection-title">New Arrival / Lookbook</h2>
+        
+        <!-- JavaScript 会自动来这里抓数据并生成卡片 -->
+        <div class="product-grid" id="mainShopGrid"></div>
+    </div>
+
+    <script>
+        // 核心引擎：异步读取同仓库下的 products.json 文件
+        fetch('products.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('网络响应似乎有点问题');
+                }
+                return response.json();
+            })
+            .then(productsData => {
+                const shopGrid = document.getElementById('mainShopGrid');
+
+                // 开始循环读取账本里的每一件衣服/包包
+                productsData.forEach(product => {
+                    const card = document.createElement('div');
+                    card.className = 'product-card';
+
+                    // 循环为当前商品抓取多张滑动细节图
+                    let sliderImagesHtml = '';
+                    product.images.forEach(imgUrl => {
+                        sliderImagesHtml += `<img src="${imgUrl}" alt="${product.name}">`;
+                    });
+
+                    // 编织进货架盒子
+                    card.innerHTML = `
+                        <div class="product-image-slider">
+                            ${sliderImagesHtml}
+                        </div>
+                        <div class="product-name">${product.name}</div>
+                        <div class="product-price">${product.price}</div>
+                        <a href="${product.link}" class="buy-btn" target="_blank">Inquire / Buy</a>
+                    `;
+
+                    shopGrid.appendChild(card);
+                });
+            })
+            .catch(error => {
+                console.error('动态账本读取失败，错误信息:', error);
+            });
+    </script>
+
+</body>
+</html>
