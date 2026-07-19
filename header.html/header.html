@@ -1,0 +1,95 @@
+<!-- ✟ ERD 顶部导航栏 HTML 结构 ✟ -->
+<div id="header">
+    <img src="logo.png" class="logo-btn" id="logoBtn" onclick="location.href='https://andseethingsasido.github.io/'">
+    
+    <div class="menu-trigger" id="menuTrigger">
+        <div class="menu-trigger-icon">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </div>
+    
+    <div id="dropdown-menu">
+        <div class="menu-links">
+            <div class="menu-item" onclick="closeMenu();location.href='https://andseethingsasido.github.io/and666/'">商店</div>
+            <div class="menu-item" onclick="closeMenu();document.getElementById('mask').style.display='flex'">公众号</div>
+        </div>
+    </div>
+</div>
+
+<!-- ✟ 导航栏专属交互 JS 引擎 ✟ -->
+<script>
+(function() {
+    const trigger = document.getElementById('menuTrigger');
+    const menu = document.getElementById('dropdown-menu');
+    const logo = document.getElementById('logoBtn');
+
+    let isHoveringTrigger = false;
+    let isHoveringMenu = false;
+    let isHoveringLogo = false;
+    let isClickOpen = false;
+
+    window.openMenu = function() {
+        menu.classList.add('show');
+        trigger.classList.add('active');
+        logo.classList.add('active');
+    }
+
+    window.closeMenu = function() {
+        menu.classList.remove('show');
+        trigger.classList.remove('active');
+        logo.classList.remove('active');
+        isClickOpen = false;
+    }
+
+    function checkMenuStatus() {
+        setTimeout(() => {
+            if (!isHoveringTrigger && !isHoveringMenu && !isHoveringLogo && !isClickOpen) {
+                closeMenu();
+            }
+        }, 50);
+    }
+
+    logo.addEventListener('mouseenter', () => {
+        isHoveringLogo = true;
+        if (menu.classList.contains('show')) { openMenu(); }
+    });
+    logo.addEventListener('mouseleave', () => {
+        isHoveringLogo = false;
+        checkMenuStatus();
+    });
+
+    trigger.addEventListener('mouseenter', () => {
+        isHoveringTrigger = true;
+        openMenu();
+    });
+    trigger.addEventListener('mouseleave', () => {
+        isHoveringTrigger = false;
+        checkMenuStatus();
+    });
+
+    trigger.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (menu.classList.contains('show') && isClickOpen) {
+            closeMenu();
+        } else {
+            isClickOpen = true;
+            openMenu();
+        }
+    });
+
+    menu.addEventListener('mouseenter', () => { isHoveringMenu = true; });
+    menu.addEventListener('mouseleave', () => { isHoveringMenu = false; checkMenuStatus(); });
+
+    document.addEventListener('click', (e) => {
+        if (isClickOpen && !menu.contains(e.target) && !trigger.contains(e.target)) {
+            closeMenu();
+        }
+    });
+
+    window.addEventListener('scroll', () => {
+        if (menu.classList.contains('show')) { closeMenu(); }
+    }, { passive: true });
+})();
+</script>
